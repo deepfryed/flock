@@ -1,6 +1,6 @@
 = Flock
 
-Ruby bindings to Cluster 3.0, http://bonsai.hgc.jp/~mdehoon/software/cluster/software.htm
+Ruby bindings to {Cluster 3.0}[http://bonsai.hgc.jp/~mdehoon/software/cluster/software.htm]
 
 == Description
 

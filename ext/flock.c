@@ -15,11 +15,21 @@ int opt_int_value(VALUE option, char *key, int def) {
 
 VALUE rb_kmeans(int argc, VALUE *argv, VALUE self) {
     VALUE size, data, mask, weights, options;
-    rb_scan_args(argc, argv, "31", &size, &data, &mask, &options);
+    rb_scan_args(argc, argv, "22", &size, &data, &mask, &options);
+
+    if (TYPE(data) != T_ARRAY)
+        rb_raise(rb_eArgError, "data should be an array of arrays");
+
+    if (!NIL_P(mask) && TYPE(mask) != T_ARRAY)
+        rb_raise(rb_eArgError, "mask should be an array of arrays");
+
+    if (NIL_P(size) || NUM2INT(rb_Integer(size)) > RARRAY_LEN(data))
+        rb_raise(rb_eArgError, "size should be > 0 and <= data size");
 
     int i,j;
     int nrows = RARRAY_LEN(data);
     int ncols = RARRAY_LEN(rb_ary_entry(data, 0));
+    int nsets = NUM2INT(rb_Integer(size));
 
     double **cdata          = (double**)malloc(sizeof(double*)*nrows);
     int    **cmask          = (int   **)malloc(sizeof(int   *)*nrows);
@@ -34,14 +44,14 @@ VALUE rb_kmeans(int argc, VALUE *argv, VALUE self) {
         ccentroid[i]      = (double*)malloc(sizeof(double)*ncols);
         ccentroid_mask[i] = (int   *)malloc(sizeof(int   )*ncols);
         for (j = 0; j < ncols; j++) {
-            cdata[i][j] = NUM2DBL(rb_ary_entry(rb_ary_entry(data, i), j));
-            cmask[i][j] = NIL_P(mask) ? 1 : NUM2INT(rb_ary_entry(rb_ary_entry(mask, i), j));
+            cdata[i][j] = NUM2DBL(rb_Float(rb_ary_entry(rb_ary_entry(data, i), j)));
+            cmask[i][j] = NIL_P(mask) ? 1 : NUM2INT(rb_Integer(rb_ary_entry(rb_ary_entry(mask, i), j)));
         }
     }
 
     weights = NIL_P(options) ? Qnil : rb_hash_aref(options, ID2SYM(rb_intern("weights")));
     for (i = 0; i < ncols; i++) {
-        cweights[i] = NIL_P(weights) ? 1.0 : NUM2DBL(rb_ary_entry(weights, i));
+        cweights[i] = NIL_P(weights) ? 1.0 : NUM2DBL(rb_Float(rb_ary_entry(weights, i)));
     }
 
     int transpose = opt_int_value(options, "transpose", 0);
@@ -60,10 +70,10 @@ VALUE rb_kmeans(int argc, VALUE *argv, VALUE self) {
 
     int    ifound;
     double error;
-    kcluster(NUM2INT(size),
+    kcluster(nsets,
         nrows, ncols, cdata, cmask, cweights, transpose, npass, method, dist, ccluster, &error, &ifound);
 
-    getclustercentroids(NUM2INT(size),
+    getclustercentroids(nsets,
         nrows, ncols, cdata, cmask, ccluster, ccentroid, ccentroid_mask, transpose, method);
 
     VALUE result   = rb_hash_new();
@@ -71,7 +81,7 @@ VALUE rb_kmeans(int argc, VALUE *argv, VALUE self) {
     VALUE centroid = rb_ary_new();
 
     for (i = 0; i < nrows; i++) {
-        rb_ary_push(cluster,  INT2NUM(ccluster[i]));
+        rb_ary_push(cluster, INT2NUM(ccluster[i]));
         VALUE point = rb_ary_new();
         for (j = 0; j < ncols; j++)
             rb_ary_push(point, DBL2NUM(ccentroid[i][j]));

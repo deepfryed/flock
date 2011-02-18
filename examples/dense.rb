@@ -1,11 +1,11 @@
 #!/usr/bin/ruby
 
+require 'pp'
 require 'flock'
 
 data     = Array.new(13) {[]}
 mask     = Array.new(13) {[]}
 weights  = Array.new(13) {1.0}
-clusters = Array.new(13)
 
 data[ 0][ 0]=0.1; data[ 0][ 1]=0.0; data[ 0][ 2]=9.6; data[ 0][ 3] = 5.6;
 data[ 1][ 0]=1.4; data[ 1][ 1]=1.3; data[ 1][ 2]=0.0; data[ 1][ 3] = 3.8;
@@ -35,5 +35,4 @@ mask[10][ 0]=1; mask[10][ 1]=1; mask[10][ 2]=1; mask[10][ 3] = 1;
 mask[11][ 0]=0; mask[11][ 1]=1; mask[11][ 2]=1; mask[11][ 3] = 1;
 mask[12][ 0]=1; mask[12][ 1]=1; mask[12][ 2]=1; mask[12][ 3] = 1;
 
-require 'pp'
 pp Flock.kmeans(6, data, mask)

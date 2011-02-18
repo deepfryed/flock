@@ -4,11 +4,11 @@ require 'pp'
 require 'flock'
 
 data = []
-data << { apple:  1, orange: 1 }
-data << { black:  1, white:  1 }
-data << { white:  1, cyan:   1 }
-data << { orange: 1 }
-data << { apple:  1 }
+data << { 1 => 0.5, 2 => 0.5 }
+data << { 3 => 1, 4 => 1 }
+data << { 4 => 1, 5 => 0.3 }
+data << { 2 => 0.75 }
+data << { 1 => 0.60 }
 
 pp Flock.sparse_kmeans(2, data)
 

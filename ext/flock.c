@@ -35,7 +35,7 @@ VALUE rb_kmeans(int argc, VALUE *argv, VALUE self) {
         ccentroid_mask[i] = (int   *)malloc(sizeof(int   )*ncols);
         for (j = 0; j < ncols; j++) {
             cdata[i][j] = NUM2DBL(rb_ary_entry(rb_ary_entry(data, i), j));
-            cmask[i][j] = NUM2INT(rb_ary_entry(rb_ary_entry(mask, i), j));
+            cmask[i][j] = NIL_P(mask) ? 1 : NUM2INT(rb_ary_entry(rb_ary_entry(mask, i), j));
         }
     }
 

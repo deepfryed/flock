@@ -1,0 +1,7 @@
+ext/*
+!ext/*.c
+!ext/*.h
+!ext/*.rb
+pkg/*
+.yardoc
+doc/*

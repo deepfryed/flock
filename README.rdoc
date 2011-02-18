@@ -1,4 +1,4 @@
-= Cluster
+= Flock
 
 Ruby bindings to Cluster 3.0, http://bonsai.hgc.jp/~mdehoon/software/cluster/software.htm
 
@@ -8,7 +8,7 @@ Provides bindings to K-Means clustering in Cluster 3.0
 
 == Synopsis
 
-  require 'cluster'
+  require 'flock'
   
   data     = Array.new(13) {[]}
   mask     = Array.new(13) {[]}
@@ -43,26 +43,26 @@ Provides bindings to K-Means clustering in Cluster 3.0
   mask[11][ 0]=0; mask[11][ 1]=1; mask[11][ 2]=1; mask[11][ 3] = 1;
   mask[12][ 0]=1; mask[12][ 1]=1; mask[12][ 2]=1; mask[12][ 3] = 1;
   
-  p Cluster.kmeans(6, data, mask)
+  p Flock.kmeans(6, data, mask)
 
   # method: 
-  #    - Cluster::METHOD_AVERAGE (default)
-  #    - Cluster::METHOD_MEDIAN
+  #    - Flock::METHOD_AVERAGE (default)
+  #    - Flock::METHOD_MEDIAN
   # metric: 
-  #    - Cluster::METRIC_EUCLIDIAN (default)
-  #    - Cluster::METRIC_CITY_BLOCK
-  #    - Cluster::METRIC_CORRELATION
-  #    - Cluster::METRIC_ABSOLUTE_CORRELATION
-  #    - Cluster::METRIC_UNCENTERED_CORRELATION
-  #    - Cluster::METRIC_ABSOLUTE_UNCENTERED_CORRELATION
-  #    - Cluster::METRIC_SPEARMAN
-  #    - Cluster::METRIC_KENDALL
-  Cluster.kmeans(
+  #    - Flock::METRIC_EUCLIDIAN (default)
+  #    - Flock::METRIC_CITY_BLOCK
+  #    - Flock::METRIC_CORRELATION
+  #    - Flock::METRIC_ABSOLUTE_CORRELATION
+  #    - Flock::METRIC_UNCENTERED_CORRELATION
+  #    - Flock::METRIC_ABSOLUTE_UNCENTERED_CORRELATION
+  #    - Flock::METRIC_SPEARMAN
+  #    - Flock::METRIC_KENDALL
+  Flock.kmeans(
     6,
     data,
     mask,
-    method:    Cluster::METHOD_KMEANS,
-    metric:    Cluster::METRIC_EUCLIDIAN,
+    method:    Flock::METHOD_KMEANS,
+    metric:    Flock::METRIC_EUCLIDIAN,
     transpose: 0,
     weights:   Array.new(13) {1.0},
   )

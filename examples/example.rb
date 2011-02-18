@@ -1,6 +1,6 @@
 #!/usr/bin/ruby
 
-require 'cluster'
+require 'flock'
 
 data     = Array.new(13) {[]}
 mask     = Array.new(13) {[]}
@@ -36,4 +36,4 @@ mask[11][ 0]=0; mask[11][ 1]=1; mask[11][ 2]=1; mask[11][ 3] = 1;
 mask[12][ 0]=1; mask[12][ 1]=1; mask[12][ 2]=1; mask[12][ 3] = 1;
 
 require 'pp'
-pp Cluster.kmeans(6, data, mask)
+pp Flock.kmeans(6, data, mask)

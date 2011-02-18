@@ -4,7 +4,7 @@
 #define ID_CONST_GET rb_intern("const_get")
 #define CONST_GET(scope, constant) (rb_funcall(scope, ID_CONST_GET, 1, rb_str_new2(constant)))
 
-static VALUE mCluster;
+static VALUE mFlock;
 
 int opt_int_value(VALUE option, char *key, int def) {
   if (NIL_P(option)) return def;
@@ -100,19 +100,19 @@ VALUE rb_kmeans(int argc, VALUE *argv, VALUE self) {
     return result;
 }
 
-void Init_cluster(void) {
-    mCluster = rb_define_module("Cluster");
-    rb_define_module_function(mCluster, "kmeans", RUBY_METHOD_FUNC(rb_kmeans), -1);
+void Init_flock(void) {
+    mFlock = rb_define_module("Flock");
+    rb_define_module_function(mFlock, "kmeans", RUBY_METHOD_FUNC(rb_kmeans), -1);
 
-    rb_define_const(mCluster, "METHOD_AVERAGE", INT2NUM('a'));
-    rb_define_const(mCluster, "METHOD_MEDIAN",  INT2NUM('m'));
+    rb_define_const(mFlock, "METHOD_AVERAGE", INT2NUM('a'));
+    rb_define_const(mFlock, "METHOD_MEDIAN",  INT2NUM('m'));
 
-    rb_define_const(mCluster, "METRIC_EUCLIDIAN",                       INT2NUM('e'));
-    rb_define_const(mCluster, "METRIC_CITY_BLOCK",                      INT2NUM('b'));
-    rb_define_const(mCluster, "METRIC_CORRELATION",                     INT2NUM('c'));
-    rb_define_const(mCluster, "METRIC_ABSOLUTE_CORRELATION",            INT2NUM('a'));
-    rb_define_const(mCluster, "METRIC_UNCENTERED_CORRELATION",          INT2NUM('u'));
-    rb_define_const(mCluster, "METRIC_ABSOLUTE_UNCENTERED_CORRELATION", INT2NUM('x'));
-    rb_define_const(mCluster, "METRIC_SPEARMAN",                        INT2NUM('s'));
-    rb_define_const(mCluster, "METRIC_KENDALL",                         INT2NUM('k'));
+    rb_define_const(mFlock, "METRIC_EUCLIDIAN",                       INT2NUM('e'));
+    rb_define_const(mFlock, "METRIC_CITY_BLOCK",                      INT2NUM('b'));
+    rb_define_const(mFlock, "METRIC_CORRELATION",                     INT2NUM('c'));
+    rb_define_const(mFlock, "METRIC_ABSOLUTE_CORRELATION",            INT2NUM('a'));
+    rb_define_const(mFlock, "METRIC_UNCENTERED_CORRELATION",          INT2NUM('u'));
+    rb_define_const(mFlock, "METRIC_ABSOLUTE_UNCENTERED_CORRELATION", INT2NUM('x'));
+    rb_define_const(mFlock, "METRIC_SPEARMAN",                        INT2NUM('s'));
+    rb_define_const(mFlock, "METRIC_KENDALL",                         INT2NUM('k'));
 }

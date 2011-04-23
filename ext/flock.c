@@ -5,6 +5,7 @@
 #define CONST_GET(scope, constant) (rb_funcall(scope, ID_CONST_GET, 1, rb_str_new2(constant)))
 
 static VALUE mFlock;
+typedef double (*distance_fn)(int, double**, double**, int**, int**, const double [], int, int, int);
 
 int opt_int_value(VALUE option, char *key, int def) {
   if (NIL_P(option)) return def;
@@ -110,6 +111,79 @@ VALUE rb_kmeans(int argc, VALUE *argv, VALUE self) {
     return result;
 }
 
+VALUE rb_distance(VALUE vec1, VALUE vec2, distance_fn fn) {
+    uint32_t size;
+    double *data1, *data2, *weight, dist;
+    int *mask, i;
+
+    if (TYPE(vec1) != T_ARRAY)
+        rb_raise(rb_eArgError, "vector1 should be an array");
+
+    if (TYPE(vec2) != T_ARRAY)
+        rb_raise(rb_eArgError, "vector2 should be an array");
+
+    size = RARRAY_LEN(vec1);
+
+    if (size != RARRAY_LEN(vec2))
+        rb_raise(rb_eArgError, "vector1 & vector2 dimensions mismatch");
+
+    if (size < 1)
+        rb_raise(rb_eArgError, "dimension should be greater than 0");
+
+    data1  = (double *)malloc(sizeof(double)*size);
+    data2  = (double *)malloc(sizeof(double)*size);
+    weight = (double *)malloc(sizeof(double)*size);
+    mask   = (int *)malloc(sizeof(int)*size);
+
+    for (i = 0; i < size; i++) {
+        mask[i]   = 1;
+        weight[i] = 1;
+        data1[i]  = NUM2DBL(rb_ary_entry(vec1, i));
+        data2[i]  = NUM2DBL(rb_ary_entry(vec2, i));
+    }
+
+    dist = fn(size, &data1, &data2, &mask, &mask, weight, 0, 0, 0);
+    free(mask);
+    free(weight);
+    free(data2);
+    free(data1);
+
+    return DBL2NUM(dist);
+}
+
+VALUE rb_euclid(VALUE self, VALUE vec1, VALUE vec2) {
+    return rb_distance(vec1, vec2, euclid);
+}
+
+VALUE rb_cityblock(VALUE self, VALUE vec1, VALUE vec2) {
+    return rb_distance(vec1, vec2, cityblock);
+}
+
+VALUE rb_correlation(VALUE self, VALUE vec1, VALUE vec2) {
+    return rb_distance(vec1, vec2, correlation);
+}
+
+VALUE rb_ucorrelation(VALUE self, VALUE vec1, VALUE vec2) {
+    return rb_distance(vec1, vec2, ucorrelation);
+}
+
+VALUE rb_acorrelation(VALUE self, VALUE vec1, VALUE vec2) {
+    return rb_distance(vec1, vec2, acorrelation);
+}
+
+VALUE rb_uacorrelation(VALUE self, VALUE vec1, VALUE vec2) {
+    return rb_distance(vec1, vec2, uacorrelation);
+}
+
+VALUE rb_spearman(VALUE self, VALUE vec1, VALUE vec2) {
+    return rb_distance(vec1, vec2, spearman);
+}
+
+VALUE rb_kendall(VALUE self, VALUE vec1, VALUE vec2) {
+    return rb_distance(vec1, vec2, kendall);
+}
+
+
 void Init_flock(void) {
     mFlock = rb_define_module("Flock");
     rb_define_module_function(mFlock, "kmeans", RUBY_METHOD_FUNC(rb_kmeans), -1);
@@ -125,4 +199,13 @@ void Init_flock(void) {
     rb_define_const(mFlock, "METRIC_ABSOLUTE_UNCENTERED_CORRELATION", INT2NUM('x'));
     rb_define_const(mFlock, "METRIC_SPEARMAN",                        INT2NUM('s'));
     rb_define_const(mFlock, "METRIC_KENDALL",                         INT2NUM('k'));
+
+    rb_define_module_function(mFlock, "euclidian_distance", RUBY_METHOD_FUNC(rb_euclid), 2);
+    rb_define_module_function(mFlock, "cityblock_distance", RUBY_METHOD_FUNC(rb_cityblock), 2);
+    rb_define_module_function(mFlock, "correlation_distance", RUBY_METHOD_FUNC(rb_correlation), 2);
+    rb_define_module_function(mFlock, "absolute_correlation_distance", RUBY_METHOD_FUNC(rb_acorrelation), 2);
+    rb_define_module_function(mFlock, "uncentered_correlation_distance", RUBY_METHOD_FUNC(rb_ucorrelation), 2);
+    rb_define_module_function(mFlock, "absolute_uncentered_correlation_distance", RUBY_METHOD_FUNC(rb_uacorrelation), 2);
+    rb_define_module_function(mFlock, "spearman_distance", RUBY_METHOD_FUNC(rb_spearman), 2);
+    rb_define_module_function(mFlock, "kendall_distance", RUBY_METHOD_FUNC(rb_kendall), 2);
 }

@@ -21,7 +21,7 @@ module Flock
     [dims,data]
   end
 
-  def self.sparse_kmeans size, sparse_data, options={}
+  def self.sparse_kmeans size, sparse_data, options = {}
     dims, data = sparse_data[0].kind_of?(Array) ? sparse_array_to_data(sparse_data) : sparse_hash_to_data(sparse_data)
 
     if options.key?(:weights)
@@ -31,5 +31,17 @@ module Flock
     end
 
     kmeans(size, data, nil, options)
+  end
+
+  def self.sparse_self_organizing_map nx, ny, sparse_data, options = {}
+    dims, data = sparse_data[0].kind_of?(Array) ? sparse_array_to_data(sparse_data) : sparse_hash_to_data(sparse_data)
+
+    if options.key?(:weights)
+      weights = Array.new(dims.size) {1}
+      options[:weights].each {|k,v| weights[dims[k]] = v }
+      options[:weights] = weights
+    end
+
+    self_organizing_map(nx, ny, data, nil, options)
   end
 end

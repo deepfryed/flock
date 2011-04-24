@@ -79,7 +79,7 @@ void cuttree (int nelements, Node* tree, int nclusters, int clusterid[]);
 void somcluster (int nrows, int ncolumns, double** data, int** mask,
   const double weight[], int transpose, int nxnodes, int nynodes,
   double inittau, int niter, char dist, double*** celldata,
-  int clusterid[][2]);
+  int **clusterid);
 
 /* Chapter 6 */
 int pca(int m, int n, double** u, double** v, double* w);

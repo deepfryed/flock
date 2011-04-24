@@ -4029,7 +4029,7 @@ void somworker (int nrows, int ncolumns, double** data, int** mask,
 static
 void somassign (int nrows, int ncolumns, double** data, int** mask,
   const double weights[], int transpose, int nxgrid, int nygrid,
-  double*** celldata, char dist, int clusterid[][2])
+  double*** celldata, char dist, int **clusterid)
 /* Collect clusterids */
 { const int ndata = (transpose==0) ? ncolumns : nrows;
   int i,j;
@@ -4113,7 +4113,7 @@ void somassign (int nrows, int ncolumns, double** data, int** mask,
 
 void somcluster (int nrows, int ncolumns, double** data, int** mask,
   const double weight[], int transpose, int nxgrid, int nygrid,
-  double inittau, int niter, char dist, double*** celldata, int clusterid[][2])
+  double inittau, int niter, char dist, double*** celldata, int **clusterid)
 /*
 
 Purpose

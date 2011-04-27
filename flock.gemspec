@@ -35,8 +35,8 @@ Gem::Specification.new do |s|
   s.test_files = [
     "examples/sparse.rb",
      "examples/som.rb",
-     "examples/tree.rb",
-     "examples/dense.rb"
+     "examples/dense.rb",
+     "examples/treecluster.rb"
   ]
 
   if s.respond_to? :specification_version then

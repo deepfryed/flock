@@ -5,11 +5,11 @@
 
 Gem::Specification.new do |s|
   s.name = %q{flock}
-  s.version = "0.3.1"
+  s.version = "0.4.0"
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.authors = ["Bharanee Rathna"]
-  s.date = %q{2011-04-24}
+  s.date = %q{2011-04-27}
   s.description = %q{A thin ruby binding to Cluster 3.0}
   s.email = ["deepfryed@gmail.com"]
   s.extensions = ["ext/extconf.rb"]
@@ -35,6 +35,7 @@ Gem::Specification.new do |s|
   s.test_files = [
     "examples/sparse.rb",
      "examples/som.rb",
+     "examples/tree.rb",
      "examples/dense.rb"
   ]
 

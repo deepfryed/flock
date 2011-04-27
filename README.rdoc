@@ -4,11 +4,15 @@ Ruby bindings to {Cluster 3.0}[http://bonsai.hgc.jp/~mdehoon/software/cluster/so
 
 == Description
 
-Provides bindings to K-Means clustering in Cluster 3.0
+Provides bindings to clustering methods in Cluster 3.0.
+
+ * K-Means
+ * Kohonen Self-Organizing Maps
+ * Tree Cluster or Hierarchical Clustering
 
 == Synopsis
 
-=== Numeric Data
+=== Specify vectors explicitly
 
   require 'pp'
   require 'flock'
@@ -69,8 +73,18 @@ Provides bindings to K-Means clustering in Cluster 3.0
     weights:   Array.new(13) {1.0},
   )
 
+  pp Flock.treecluster(
+    6,
+    data,
+    mask,
+    method:    Flock::METHOD_AVERAGE,
+    metric:    Flock::METRIC_EUCLIDIAN,
+    transpose: 0,
+    weights:   Array.new(13) {1.0},
+  )
 
-=== Sparse and Non-Numeric data
+
+=== Sparse data and clustering string labels
 
   require 'pp'
   require 'flock'
@@ -88,7 +102,7 @@ Provides bindings to K-Means clustering in Cluster 3.0
 
   data = []
 
-  # a much simpler way to cluster text
+  # a much simpler way to cluster text labels.
   data << %w(apple orange)
   data << %w(black white)
   data << %w(white cyan)
@@ -97,8 +111,14 @@ Provides bindings to K-Means clustering in Cluster 3.0
 
   # additional options such as metric, iterations can be passed in a hash.
   pp Flock.sparse_kmeans(2, data)
+  pp Flock.sparse_treecluster(2, data)
+
 
 === Self-Organizing Map
+
+Self-Organizing Maps (SOM) require that you specify a 2D grid on which data points can cluster. Some of the
+grid points may be empty and others might have clusters mapped to them. There is no need to provide
+a fixed cluster size like K-Means or Tree Cluster.
 
   require 'pp'
   require 'flock'
@@ -116,11 +136,13 @@ Provides bindings to K-Means clustering in Cluster 3.0
   # additional options such as metric, iterations can be passed in a hash.
   pp Flock.sparse_self_organizing_map(2, 2, data)
 
+Note: SOM clustering provides the 2D grid coordinate for each vector instead of an integer cluster value
+for each vector like K-Means and Tree Cluster methods do.
+
 == TODO
 
-Bindings to,
-
-* Hierarchical clustering (treecluster)
+* {K-Tree clustering}[http://arxiv.org/pdf/1001.0827v1]
+* Use Sparse Matrix instead of converting sparse data into dense matrices.
 
 = License
 

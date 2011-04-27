@@ -218,8 +218,12 @@ VALUE rb_som(int argc, VALUE *argv, VALUE self) {
     VALUE cluster  = rb_ary_new();
     VALUE centroid = rb_ary_new();
 
-    for (i = 0; i < dimx; i++)
-        rb_ary_push(cluster, INT2NUM(ccluster[i][0] * nxgrid + ccluster[i][1]));
+    for (i = 0; i < dimx; i++) {
+        VALUE gridpoint = rb_ary_new();
+        rb_ary_push(gridpoint, INT2NUM(ccluster[i][0]));
+        rb_ary_push(gridpoint, INT2NUM(ccluster[i][1]));
+        rb_ary_push(cluster, gridpoint);
+    }
 
     for (i = 0; i < nxgrid; i++) {
         for (j = 0; j < nygrid; j++) {
@@ -256,6 +260,96 @@ VALUE rb_som(int argc, VALUE *argv, VALUE self) {
     return result;
 }
 
+VALUE rb_treecluster(int argc, VALUE *argv, VALUE self) {
+    VALUE size, data, mask, weights, options;
+    rb_scan_args(argc, argv, "22", &size, &data, &mask, &options);
+
+    if (TYPE(data) != T_ARRAY)
+        rb_raise(rb_eArgError, "data should be an array of arrays");
+
+    if (!NIL_P(mask) && TYPE(mask) != T_ARRAY)
+        rb_raise(rb_eArgError, "mask should be an array of arrays");
+
+    if (NIL_P(size) || NUM2INT(rb_Integer(size)) > RARRAY_LEN(data))
+        rb_raise(rb_eArgError, "size should be > 0 and <= data size");
+
+    int transpose = opt_int_value(options, "transpose", 0);
+    // a = average, m = means
+    int method    = opt_int_value(options, "method", 'a');
+    // e = euclidian,
+    // b = city-block distance
+    // c = correlation
+    // a = absolute value of the correlation
+    // u = uncentered correlation
+    // x = absolute uncentered correlation
+    // s = spearman's rank correlation
+    // k = kendall's tau
+    int dist      = opt_int_value(options, "metric", 'e');
+
+    int i,j;
+    int nrows = RARRAY_LEN(data);
+    int ncols = RARRAY_LEN(rb_ary_entry(data, 0));
+    int nsets = NUM2INT(rb_Integer(size));
+
+    double **cdata    = (double**)malloc(sizeof(double*)*nrows);
+    int    **cmask    = (int   **)malloc(sizeof(int   *)*nrows);
+    double *cweights  = (double *)malloc(sizeof(double )*ncols);
+
+    int *ccluster, dimx = nrows, dimy = ncols;
+
+    for (i = 0; i < nrows; i++) {
+        cdata[i]          = (double*)malloc(sizeof(double)*ncols);
+        cmask[i]          = (int   *)malloc(sizeof(int   )*ncols);
+        for (j = 0; j < ncols; j++) {
+            cdata[i][j] = NUM2DBL(rb_Float(rb_ary_entry(rb_ary_entry(data, i), j)));
+            cmask[i][j] = NIL_P(mask) ? 1 : NUM2INT(rb_Integer(rb_ary_entry(rb_ary_entry(mask, i), j)));
+        }
+    }
+
+    weights = NIL_P(options) ? Qnil : rb_hash_aref(options, ID2SYM(rb_intern("weights")));
+    for (i = 0; i < ncols; i++) {
+        cweights[i] = NIL_P(weights) ? 1.0 : NUM2DBL(rb_Float(rb_ary_entry(weights, i)));
+    }
+
+    if (transpose) {
+        dimx  = ncols;
+        dimy  = nrows;
+    }
+
+    ccluster = (int *)malloc(sizeof(int)*dimx);
+
+    Node *tree   = treecluster(nrows, ncols, cdata, cmask, cweights, transpose, dist, method, 0);
+    VALUE result = Qnil, cluster;
+
+    if (tree) {
+        cuttree(dimx, tree, nsets, ccluster);
+
+        result  = rb_hash_new();
+        cluster = rb_ary_new();
+
+        for (i = 0; i < dimx; i++)
+            rb_ary_push(cluster, INT2NUM(ccluster[i]));
+
+        rb_hash_aset(result, ID2SYM(rb_intern("cluster")),   cluster);
+    }
+
+    for (i = 0; i < nrows; i++) {
+        free(cdata[i]);
+        free(cmask[i]);
+    }
+
+    free(cdata);
+    free(cmask);
+    free(cweights);
+    free(ccluster);
+
+    if (tree)
+        free(tree);
+    else
+        rb_raise(rb_eNoMemError, "tree cluster ran out of memory");
+
+    return result;
+}
 
 VALUE rb_distance(VALUE vec1, VALUE vec2, distance_fn fn) {
     uint32_t size;
@@ -334,6 +428,7 @@ void Init_flock(void) {
     mFlock = rb_define_module("Flock");
     rb_define_module_function(mFlock, "kmeans", RUBY_METHOD_FUNC(rb_kmeans), -1);
     rb_define_module_function(mFlock, "self_organizing_map", RUBY_METHOD_FUNC(rb_som), -1);
+    rb_define_module_function(mFlock, "treecluster", RUBY_METHOD_FUNC(rb_treecluster), -1);
 
     rb_define_const(mFlock, "METHOD_AVERAGE", INT2NUM('a'));
     rb_define_const(mFlock, "METHOD_MEDIAN",  INT2NUM('m'));

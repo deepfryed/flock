@@ -8,7 +8,7 @@ module Flock
       sv.each {|k,v| vector[dims[k]] = v }
       vector
     end
-    [dims,data]
+    [dims, data]
   end
 
   def self.sparse_array_to_data sparse_data
@@ -18,7 +18,7 @@ module Flock
       sv.each {|k| vector[dims[k]] = 1 }
       vector
     end
-    [dims,data]
+    [dims, data]
   end
 
   def self.densify sparse_data, weights = nil
@@ -35,16 +35,16 @@ module Flock
 
   def self.sparse_kmeans size, sparse_data, options = {}
     data, options[:weights] = densify(sparse_data, options[:weights])
-    kmeans(size, data, nil, options)
+    kmeans(size, data, data, options)
   end
 
   def self.sparse_self_organizing_map nx, ny, sparse_data, options = {}
     data, options[:weights] = densify(sparse_data, options[:weights])
-    self_organizing_map(nx, ny, data, nil, options)
+    self_organizing_map(nx, ny, data, data, options)
   end
 
   def self.sparse_treecluster size, sparse_data, options = {}
     data, options[:weights] = densify(sparse_data, options[:weights])
-    treecluster(size, data, nil, options)
+    treecluster(size, data, data, options)
   end
 end

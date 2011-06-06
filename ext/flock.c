@@ -351,10 +351,20 @@ VALUE rb_treecluster(int argc, VALUE *argv, VALUE self) {
     return result;
 }
 
-VALUE rb_distance(VALUE vec1, VALUE vec2, distance_fn fn) {
+void inline copy_mask(VALUE src, int *dst, int size, int def) {
+    int i;
+    if (NIL_P(src))
+        for (i = 0; i < size; i++)
+            dst[i] = def;
+    else
+        for (i = 0; i < size; i++)
+            dst[i] = NUM2INT(rb_ary_entry(src, i));
+}
+
+VALUE rb_distance(VALUE vec1, VALUE m1, VALUE vec2, VALUE m2, distance_fn fn) {
     uint32_t size;
     double *data1, *data2, *weight, dist;
-    int *mask, i;
+    int *mask1, *mask2, i;
 
     if (TYPE(vec1) != T_ARRAY)
         rb_raise(rb_eArgError, "vector1 should be an array");
@@ -373,17 +383,21 @@ VALUE rb_distance(VALUE vec1, VALUE vec2, distance_fn fn) {
     data1  = (double *)malloc(sizeof(double)*size);
     data2  = (double *)malloc(sizeof(double)*size);
     weight = (double *)malloc(sizeof(double)*size);
-    mask   = (int *)malloc(sizeof(int)*size);
+    mask1  = (int *)malloc(sizeof(int)*size);
+    mask2  = (int *)malloc(sizeof(int)*size);
 
     for (i = 0; i < size; i++) {
-        mask[i]   = 1;
         weight[i] = 1;
         data1[i]  = NUM2DBL(rb_ary_entry(vec1, i));
         data2[i]  = NUM2DBL(rb_ary_entry(vec2, i));
     }
 
-    dist = fn(size, &data1, &data2, &mask, &mask, weight, 0, 0, 0);
-    free(mask);
+    copy_mask(m1, mask1, size, 1);
+    copy_mask(m2, mask2, size, 1);
+
+    dist = fn(size, &data1, &data2, &mask1, &mask2, weight, 0, 0, 0);
+    free(mask1);
+    free(mask2);
     free(weight);
     free(data2);
     free(data1);
@@ -391,36 +405,52 @@ VALUE rb_distance(VALUE vec1, VALUE vec2, distance_fn fn) {
     return DBL2NUM(dist);
 }
 
-VALUE rb_euclid(VALUE self, VALUE vec1, VALUE vec2) {
-    return rb_distance(vec1, vec2, euclid);
+VALUE rb_euclid(int argc, VALUE *argv, VALUE self) {
+    VALUE v1, v2, m1, m2;
+    rb_scan_args(argc, argv, "22", &v1, &v2, &m1, &m2);
+    return rb_distance(v1, m1, v2, m2, euclid);
 }
 
-VALUE rb_cityblock(VALUE self, VALUE vec1, VALUE vec2) {
-    return rb_distance(vec1, vec2, cityblock);
+VALUE rb_cityblock(int argc, VALUE *argv, VALUE self) {
+    VALUE v1, v2, m1, m2;
+    rb_scan_args(argc, argv, "22", &v1, &v2, &m1, &m2);
+    return rb_distance(v1, m1, v2, m2, cityblock);
 }
 
-VALUE rb_correlation(VALUE self, VALUE vec1, VALUE vec2) {
-    return rb_distance(vec1, vec2, correlation);
+VALUE rb_correlation(int argc, VALUE *argv, VALUE self) {
+    VALUE v1, v2, m1, m2;
+    rb_scan_args(argc, argv, "22", &v1, &v2, &m1, &m2);
+    return rb_distance(v1, m1, v2, m2, correlation);
 }
 
-VALUE rb_ucorrelation(VALUE self, VALUE vec1, VALUE vec2) {
-    return rb_distance(vec1, vec2, ucorrelation);
+VALUE rb_ucorrelation(int argc, VALUE *argv, VALUE self) {
+    VALUE v1, v2, m1, m2;
+    rb_scan_args(argc, argv, "22", &v1, &v2, &m1, &m2);
+    return rb_distance(v1, m1, v2, m2, ucorrelation);
 }
 
-VALUE rb_acorrelation(VALUE self, VALUE vec1, VALUE vec2) {
-    return rb_distance(vec1, vec2, acorrelation);
+VALUE rb_acorrelation(int argc, VALUE *argv, VALUE self) {
+    VALUE v1, v2, m1, m2;
+    rb_scan_args(argc, argv, "22", &v1, &v2, &m1, &m2);
+    return rb_distance(v1, m1, v2, m2, acorrelation);
 }
 
-VALUE rb_uacorrelation(VALUE self, VALUE vec1, VALUE vec2) {
-    return rb_distance(vec1, vec2, uacorrelation);
+VALUE rb_uacorrelation(int argc, VALUE *argv, VALUE self) {
+    VALUE v1, v2, m1, m2;
+    rb_scan_args(argc, argv, "22", &v1, &v2, &m1, &m2);
+    return rb_distance(v1, m1, v2, m2, uacorrelation);
 }
 
-VALUE rb_spearman(VALUE self, VALUE vec1, VALUE vec2) {
-    return rb_distance(vec1, vec2, spearman);
+VALUE rb_spearman(int argc, VALUE *argv, VALUE self) {
+    VALUE v1, v2, m1, m2;
+    rb_scan_args(argc, argv, "22", &v1, &v2, &m1, &m2);
+    return rb_distance(v1, m1, v2, m2, spearman);
 }
 
-VALUE rb_kendall(VALUE self, VALUE vec1, VALUE vec2) {
-    return rb_distance(vec1, vec2, kendall);
+VALUE rb_kendall(int argc, VALUE *argv, VALUE self) {
+    VALUE v1, v2, m1, m2;
+    rb_scan_args(argc, argv, "22", &v1, &v2, &m1, &m2);
+    return rb_distance(v1, m1, v2, m2, kendall);
 }
 
 
@@ -442,12 +472,12 @@ void Init_flock(void) {
     rb_define_const(mFlock, "METRIC_SPEARMAN",                        INT2NUM('s'));
     rb_define_const(mFlock, "METRIC_KENDALL",                         INT2NUM('k'));
 
-    rb_define_module_function(mFlock, "euclidian_distance", RUBY_METHOD_FUNC(rb_euclid), 2);
-    rb_define_module_function(mFlock, "cityblock_distance", RUBY_METHOD_FUNC(rb_cityblock), 2);
-    rb_define_module_function(mFlock, "correlation_distance", RUBY_METHOD_FUNC(rb_correlation), 2);
-    rb_define_module_function(mFlock, "absolute_correlation_distance", RUBY_METHOD_FUNC(rb_acorrelation), 2);
-    rb_define_module_function(mFlock, "uncentered_correlation_distance", RUBY_METHOD_FUNC(rb_ucorrelation), 2);
-    rb_define_module_function(mFlock, "absolute_uncentered_correlation_distance", RUBY_METHOD_FUNC(rb_uacorrelation), 2);
-    rb_define_module_function(mFlock, "spearman_distance", RUBY_METHOD_FUNC(rb_spearman), 2);
-    rb_define_module_function(mFlock, "kendall_distance", RUBY_METHOD_FUNC(rb_kendall), 2);
+    rb_define_module_function(mFlock, "euclidian_distance", RUBY_METHOD_FUNC(rb_euclid), -1);
+    rb_define_module_function(mFlock, "cityblock_distance", RUBY_METHOD_FUNC(rb_cityblock), -1);
+    rb_define_module_function(mFlock, "correlation_distance", RUBY_METHOD_FUNC(rb_correlation), -1);
+    rb_define_module_function(mFlock, "absolute_correlation_distance", RUBY_METHOD_FUNC(rb_acorrelation), -1);
+    rb_define_module_function(mFlock, "uncentered_correlation_distance", RUBY_METHOD_FUNC(rb_ucorrelation), -1);
+    rb_define_module_function(mFlock, "absolute_uncentered_correlation_distance", RUBY_METHOD_FUNC(rb_uacorrelation), -1);
+    rb_define_module_function(mFlock, "spearman_distance", RUBY_METHOD_FUNC(rb_spearman), -1);
+    rb_define_module_function(mFlock, "kendall_distance", RUBY_METHOD_FUNC(rb_kendall), -1);
 }

@@ -37,6 +37,18 @@
 #  include <windows.h>
 #endif
 
+// kmeans++ assignment weighted based on distance from first point chosen.
+extern void weightedassign(int nclusters, int nrows, int ncolumns,
+                           double** data, int** mask, double weight[], int transpose,
+                           double (*metric)(int, double**, double**, int**, int**, const double[], int, int, int),
+                           int clusterid[]);
+
+// kmeans++ assignment based on distance from other cluster centers.
+extern void spreadoutassign(int nclusters, int nrows, int ncolumns,
+                            double** data, int** mask, double weight[], int transpose,
+                            double (*metric)(int, double**, double**, int**, int**, const double[], int, int, int),
+                            int clusterid[]);
+
 /* ************************************************************************ */
 
 #ifdef WINDOWS
@@ -1718,7 +1730,7 @@ static double(*setmetric(char dist))
 
 /* *********************************************************************  */
 
-static double uniform(void)
+double uniform(void)
 /*
 Purpose
 =======
@@ -1978,6 +1990,7 @@ The cluster number to which an element was assigned.
 
   return;
 }
+
 
 /* ********************************************************************* */
 
@@ -2346,7 +2359,7 @@ static int
 kmeans(int nclusters, int nrows, int ncolumns, double** data, int** mask,
   double weight[], int transpose, int npass, char dist,
   double** cdata, int** cmask, int clusterid[], double* error,
-  int tclusterid[], int counts[], int mapping[])
+  int tclusterid[], int counts[], int mapping[], int assign)
 { int i, j, k;
   const int nelements = (transpose==0) ? nrows : ncolumns;
   const int ndata = (transpose==0) ? ncolumns : nrows;
@@ -2368,11 +2381,28 @@ kmeans(int nclusters, int nrows, int ncolumns, double** data, int** mask,
     int counter = 0;
     int period = 10;
 
-    /* Perform the EM algorithm. First, randomly assign elements to clusters. */
-    if (npass!=0) randomassign (nclusters, nelements, tclusterid);
+    if (npass!=0) {
+      switch(assign) {
+        case 1:
+          /* use kmeans++ weighted randomized initialisation */
+          weightedassign (nclusters, nrows, ncolumns, data, mask, weight, transpose, metric, tclusterid);
+          break;
+        case 2:
+          /* use kmeans++ initialisation by spreading out cluster centers as much as possible */
+          spreadoutassign (nclusters, nrows, ncolumns, data, mask, weight, transpose, metric, tclusterid);
+          break;
+        default:
+          /* Perform the EM algorithm. First, randomly assign elements to clusters. */
+          randomassign (nclusters, nelements, tclusterid);
+          break;
+      }
+    }
 
     for (i = 0; i < nclusters; i++) counts[i] = 0;
     for (i = 0; i < nelements; i++) counts[tclusterid[i]]++;
+
+    //for (i = 0; i < nelements; i++) printf("%d) %d\n", i, tclusterid[i]);
+    //exit(0);
 
     /* Start the loop */
     while(1)
@@ -2451,7 +2481,7 @@ static int
 kmedians(int nclusters, int nrows, int ncolumns, double** data, int** mask,
   double weight[], int transpose, int npass, char dist,
   double** cdata, int** cmask, int clusterid[], double* error,
-  int tclusterid[], int counts[], int mapping[], double cache[])
+  int tclusterid[], int counts[], int mapping[], double cache[], int assign)
 { int i, j, k;
   const int nelements = (transpose==0) ? nrows : ncolumns;
   const int ndata = (transpose==0) ? ncolumns : nrows;
@@ -2473,8 +2503,22 @@ kmedians(int nclusters, int nrows, int ncolumns, double** data, int** mask,
     int counter = 0;
     int period = 10;
 
-    /* Perform the EM algorithm. First, randomly assign elements to clusters. */
-    if (npass!=0) randomassign (nclusters, nelements, tclusterid);
+    if (npass!=0) {
+      switch(assign) {
+        case 1:
+          /* use kmeans++ weighted randomized initialisation */
+          weightedassign (nclusters, nrows, ncolumns, data, mask, weight, transpose, metric, tclusterid);
+          break;
+        case 2:
+          /* use kmeans++ initialisation by spreading out cluster centers as much as possible */
+          spreadoutassign (nclusters, nrows, ncolumns, data, mask, weight, transpose, metric, tclusterid);
+          break;
+        default:
+          /* Perform the EM algorithm. First, randomly assign elements to clusters. */
+          randomassign (nclusters, nelements, tclusterid);
+          break;
+      }
+    }
 
     for (i = 0; i < nclusters; i++) counts[i]=0;
     for (i = 0; i < nelements; i++) counts[tclusterid[i]]++;
@@ -2555,7 +2599,7 @@ kmedians(int nclusters, int nrows, int ncolumns, double** data, int** mask,
 void kcluster (int nclusters, int nrows, int ncolumns,
   double** data, int** mask, double weight[], int transpose,
   int npass, char method, char dist,
-  int clusterid[], double* error, int* ifound)
+  int clusterid[], double* error, int* ifound, int assign)
 /*
 Purpose
 =======
@@ -2635,6 +2679,9 @@ number of clusters is larger than the number of elements being clustered,
 *ifound is set to 0 as an error code. If a memory allocation error occurs,
 *ifound is set to -1.
 
+assign     (input) int
+The method of initialisation. 0 - default random, 1 - kmeans++ weighted randomized, 2 - spreadout centers
+
 ========================================================================
 */
 { const int nelements = (transpose==0) ? nrows : ncolumns;
@@ -2695,14 +2742,14 @@ number of clusters is larger than the number of elements being clustered,
     if(cache)
     { *ifound = kmedians(nclusters, nrows, ncolumns, data, mask, weight,
                          transpose, npass, dist, cdata, cmask, clusterid, error,
-                         tclusterid, counts, mapping, cache);
+                         tclusterid, counts, mapping, cache, assign);
       free(cache);
     }
   }
   else
     *ifound = kmeans(nclusters, nrows, ncolumns, data, mask, weight,
                      transpose, npass, dist, cdata, cmask, clusterid, error,
-                     tclusterid, counts, mapping);
+                     tclusterid, counts, mapping, assign);
 
   /* Deallocate temporarily used space */
   if (npass > 1)

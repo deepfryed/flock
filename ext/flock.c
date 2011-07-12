@@ -48,6 +48,9 @@ VALUE rb_kmeans(int argc, VALUE *argv, VALUE self) {
     // k = kendall's tau
     int dist      = opt_int_value(options, "metric", 'e');
 
+    // initial assignment
+    int assign    = opt_int_value(options, "seed",    0);
+
     int i,j;
     int nrows = RARRAY_LEN(data);
     int ncols = RARRAY_LEN(rb_ary_entry(data, 0));
@@ -94,7 +97,7 @@ VALUE rb_kmeans(int argc, VALUE *argv, VALUE self) {
     double error;
 
     kcluster(nsets,
-        nrows, ncols, cdata, cmask, cweights, transpose, npass, method, dist, ccluster, &error, &ifound);
+        nrows, ncols, cdata, cmask, cweights, transpose, npass, method, dist, ccluster, &error, &ifound, assign);
     getclustercentroids(nsets,
         nrows, ncols, cdata, cmask, ccluster, ccentroid, ccentroid_mask, transpose, method);
 
@@ -471,6 +474,10 @@ void Init_flock(void) {
     rb_define_const(mFlock, "METRIC_ABSOLUTE_UNCENTERED_CORRELATION", INT2NUM('x'));
     rb_define_const(mFlock, "METRIC_SPEARMAN",                        INT2NUM('s'));
     rb_define_const(mFlock, "METRIC_KENDALL",                         INT2NUM('k'));
+
+    rb_define_const(mFlock, "SEED_RANDOM",          INT2NUM(0));
+    rb_define_const(mFlock, "SEED_KMEANS_PLUSPLUS", INT2NUM(1));
+    rb_define_const(mFlock, "SEED_SPREADOUT",       INT2NUM(2));
 
     rb_define_module_function(mFlock, "euclidian_distance", RUBY_METHOD_FUNC(rb_euclid), -1);
     rb_define_module_function(mFlock, "cityblock_distance", RUBY_METHOD_FUNC(rb_cityblock), -1);

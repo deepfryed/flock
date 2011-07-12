@@ -35,4 +35,4 @@ mask[10][ 0]=1; mask[10][ 1]=1; mask[10][ 2]=1; mask[10][ 3] = 1;
 mask[11][ 0]=0; mask[11][ 1]=1; mask[11][ 2]=1; mask[11][ 3] = 1;
 mask[12][ 0]=1; mask[12][ 1]=1; mask[12][ 2]=1; mask[12][ 3] = 1;
 
-pp Flock.kmeans(6, data, mask)
+pp Flock.kmeans(6, data, mask, seed: 2)

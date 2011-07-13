@@ -27,7 +27,6 @@ double compute_distances(int ndata, int npoints,
       if (!dists[j].chosen) continue;
 
       dist = metric(ndata, data, data, mask, mask, weight, dists[i].n, dists[j].n, transpose);
-      //printf("i: %d j: %d d: %.2f\n", dists[i].n, dists[j].n, dist);
       if (min < 0 || min > dist) {
         min     = dist;
         closest = j;

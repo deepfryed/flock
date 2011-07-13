@@ -2401,9 +2401,6 @@ kmeans(int nclusters, int nrows, int ncolumns, double** data, int** mask,
     for (i = 0; i < nclusters; i++) counts[i] = 0;
     for (i = 0; i < nelements; i++) counts[tclusterid[i]]++;
 
-    //for (i = 0; i < nelements; i++) printf("%d) %d\n", i, tclusterid[i]);
-    //exit(0);
-
     /* Start the loop */
     while(1)
     { double previous = total;

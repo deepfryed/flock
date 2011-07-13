@@ -35,16 +35,16 @@ module Flock
 
   def self.sparse_kmeans size, sparse_data, options = {}
     data, options[:weights] = densify(sparse_data, options[:weights])
-    kmeans(size, data, data, options)
+    kmeans(size, data, nil, options)
   end
 
   def self.sparse_self_organizing_map nx, ny, sparse_data, options = {}
     data, options[:weights] = densify(sparse_data, options[:weights])
-    self_organizing_map(nx, ny, data, data, options)
+    self_organizing_map(nx, ny, data, nil, options)
   end
 
   def self.sparse_treecluster size, sparse_data, options = {}
     data, options[:weights] = densify(sparse_data, options[:weights])
-    treecluster(size, data, data, options)
+    treecluster(size, data, nil, options)
   end
 end

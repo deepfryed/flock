@@ -10,7 +10,7 @@ data << { 4 => 1, 5 => 0.3 }
 data << { 2 => 0.75 }
 data << { 1 => 0.60 }
 
-#pp Flock.sparse_kmeans(2, data)
+pp Flock.sparse_kmeans(2, data)
 
 data = []
 data << %w(apple orange)
@@ -19,4 +19,6 @@ data << %w(white cyan)
 data << %w(apple orange)
 data << %w(apple)
 
-pp Flock.sparse_kmeans(2, data, seed: 2)
+pp Flock.sparse_kmeans(2, data, seed: Flock::SEED_RANDOM)
+pp Flock.sparse_kmeans(2, data, seed: Flock::SEED_KMEANS_PLUSPLUS)
+pp Flock.sparse_kmeans(2, data, seed: Flock::SEED_SPREADOUT)

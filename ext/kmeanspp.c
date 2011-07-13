@@ -15,7 +15,7 @@ double compute_distances(int ndata, int npoints,
   double **data, int **mask, double weight[], int transpose, clusterpoint dists[],
   double (*metric)(int, double**, double**, int**, int**, const double[], int, int, int)) {
 
-  int i, j, closest;
+  int i, j, closest = 0;
   double min, dist, total = 0;
 
   // compute distances to chosen point
@@ -27,6 +27,7 @@ double compute_distances(int ndata, int npoints,
       if (!dists[j].chosen) continue;
 
       dist = metric(ndata, data, data, mask, mask, weight, dists[i].n, dists[j].n, transpose);
+      //printf("i: %d j: %d d: %.2f\n", dists[i].n, dists[j].n, dist);
       if (min < 0 || min > dist) {
         min     = dist;
         closest = j;
@@ -85,7 +86,7 @@ void weightedassign(int nclusters, int nrows, int ncolumns,
   compute_distances(ndata, npoints, data, mask, weight, transpose, dists, metric);
   for (n = 0; n < npoints; n++) {
     if (dists[n].chosen) continue;
-    clusterid[dists[n].n] = clusterid[dists[n].closest];
+    clusterid[dists[n].n] = clusterid[dists[dists[n].closest].n];
   }
 }
 
@@ -124,6 +125,6 @@ void spreadoutassign(int nclusters, int nrows, int ncolumns,
   compute_distances(ndata, npoints, data, mask, weight, transpose, dists, metric);
   for (n = 0; n < npoints; n++) {
     if (dists[n].chosen) continue;
-    clusterid[dists[n].n] = clusterid[dists[n].closest];
+    clusterid[dists[n].n] = clusterid[dists[dists[n].closest].n];
   }
 }

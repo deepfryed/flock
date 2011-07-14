@@ -3,6 +3,7 @@
 
 #define ID_CONST_GET rb_intern("const_get")
 #define CONST_GET(scope, constant) (rb_funcall(scope, ID_CONST_GET, 1, rb_str_new2(constant)))
+#define DEFAULT_ITERATIONS 100
 
 static VALUE mFlock;
 typedef double (*distance_fn)(int, double**, double**, int**, int**, const double [], int, int, int);
@@ -35,7 +36,7 @@ VALUE rb_kmeans(int argc, VALUE *argv, VALUE self) {
         rb_raise(rb_eArgError, "size should be > 0 and <= data size");
 
     int transpose = opt_int_value(options, "transpose", 0);
-    int npass     = opt_int_value(options, "iterations", 1000);
+    int npass     = opt_int_value(options, "iterations", DEFAULT_ITERATIONS);
     // a = average, m = means
     int method    = opt_int_value(options, "method", 'a');
     // e = euclidian,
@@ -159,7 +160,7 @@ VALUE rb_som(int argc, VALUE *argv, VALUE self) {
     int nxgrid    = NUM2INT(rb_Integer(nx));
     int nygrid    = NUM2INT(rb_Integer(ny));
     int transpose = opt_int_value(options, "transpose", 0);
-    int npass     = opt_int_value(options, "iterations", 1000);
+    int npass     = opt_int_value(options, "iterations", DEFAULT_ITERATIONS);
 
     // e = euclidian,
     // b = city-block distance
@@ -214,8 +215,7 @@ VALUE rb_som(int argc, VALUE *argv, VALUE self) {
             ccelldata[i][j] = (double *)malloc(sizeof(double)*dimy);
     }
 
-    somcluster(nrows, ncols, cdata, cmask, cweights, transpose,
-        nxgrid, nygrid, tau, npass, dist, ccelldata, ccluster);
+    somcluster(nrows, ncols, cdata, cmask, cweights, transpose, nxgrid, nygrid, tau, npass, dist, ccelldata, ccluster);
 
     VALUE result   = rb_hash_new();
     VALUE cluster  = rb_ary_new();

@@ -2557,20 +2557,20 @@ static int kmeans (int nclusters, int nrows, int ncolumns, double **data, int **
 
         if (npass != 0) {
             switch (assign) {
-            case 1:
-                /* use kmeans++ weighted randomized initialisation */
-                weightedassign (nclusters, nrows, ncolumns, data, mask,
-                                weight, transpose, metric, tclusterid);
-                break;
-            case 2:
-                /* use kmeans++ initialisation by spreading out cluster centers as much as possible */
-                spreadoutassign (nclusters, nrows, ncolumns, data, mask,
-                                 weight, transpose, metric, tclusterid);
-                break;
-            default:
-                /* Perform the EM algorithm. First, randomly assign elements to clusters. */
-                randomassign (nclusters, nelements, tclusterid);
-                break;
+                case 1:
+                    /* use kmeans++ weighted randomized initialisation */
+                    weightedassign (nclusters, nrows, ncolumns, data, mask,
+                                    weight, transpose, metric, tclusterid);
+                    break;
+                case 2:
+                    /* use kmeans++ initialisation by spreading out cluster centers as much as possible */
+                    spreadoutassign (nclusters, nrows, ncolumns, data, mask,
+                                     weight, transpose, metric, tclusterid);
+                    break;
+                default:
+                    /* Perform the EM algorithm. First, randomly assign elements to clusters. */
+                    randomassign (nclusters, nelements, tclusterid);
+                    break;
             }
         }
 
@@ -2593,20 +2593,20 @@ static int kmeans (int nclusters, int nrows, int ncolumns, double **data, int **
             counter++;
 
             /* Find the center */
-            getclustermeans (nclusters, nrows, ncolumns, data, mask,
-                             tclusterid, cdata, cmask, transpose);
+            getclustermeans (nclusters, nrows, ncolumns, data, mask, tclusterid, cdata, cmask, transpose);
 
             /* Calculate the distances */
             for (i = 0; i < nelements; i++) {
                 double distance;
                 k = tclusterid[i];
-                if (counts[k] == 1)
-                    continue;
+
                 /* No reassignment if that would lead to an empty cluster */
                 /* Treat the present cluster as a special case */
-                distance =
-                    metric (ndata, data, cdata, mask, cmask, weight, i, k,
-                            transpose);
+                if (counts[k] == 1)
+                    continue;
+
+                distance = metric (ndata, data, cdata, mask, cmask, weight, i, k, transpose);
+
                 for (j = 0; j < nclusters; j++) {
                     double tdistance;
                     if (j == k)
@@ -2623,15 +2623,19 @@ static int kmeans (int nclusters, int nrows, int ncolumns, double **data, int **
                 }
                 total += distance;
             }
-            if (total >= previous)
-                break;
+
             /* total>=previous is FALSE on some machines even if total and previous
              * are bitwise identical. */
+            if (total >= previous)
+                break;
+
             for (i = 0; i < nelements; i++)
                 if (saved[i] != tclusterid[i])
                     break;
+
+            /* Identical solution found; break out of this loop */
             if (i == nelements)
-                break;          /* Identical solution found; break out of this loop */
+                break;
         }
 
         if (npass <= 1) {
@@ -2656,8 +2660,10 @@ static int kmeans (int nclusters, int nrows, int ncolumns, double **data, int **
                 break;
             }
         }
+
+        /* break statement not encountered */
         if (i == nelements)
-            ifound++;           /* break statement not encountered */
+            ifound++;
     } while (++ipass < npass);
 
     free (saved);

@@ -37,8 +37,10 @@ VALUE rb_kmeans(int argc, VALUE *argv, VALUE self) {
 
     int transpose = opt_int_value(options, "transpose", 0);
     int npass     = opt_int_value(options, "iterations", DEFAULT_ITERATIONS);
+
     // a = average, m = means
     int method    = opt_int_value(options, "method", 'a');
+
     // e = euclidian,
     // b = city-block distance
     // c = correlation
@@ -277,8 +279,13 @@ VALUE rb_treecluster(int argc, VALUE *argv, VALUE self) {
         rb_raise(rb_eArgError, "size should be > 0 and <= data size");
 
     int transpose = opt_int_value(options, "transpose", 0);
-    // a = average, m = means
+
+    // s: pairwise single-linkage clustering
+    // m: pairwise maximum- (or complete-) linkage clustering
+    // a: pairwise average-linkage clustering
+    // c: pairwise centroid-linkage clustering
     int method    = opt_int_value(options, "method", 'a');
+
     // e = euclidian,
     // b = city-block distance
     // c = correlation
@@ -463,8 +470,22 @@ void Init_flock(void) {
     rb_define_module_function(mFlock, "self_organizing_map", RUBY_METHOD_FUNC(rb_som), -1);
     rb_define_module_function(mFlock, "treecluster", RUBY_METHOD_FUNC(rb_treecluster), -1);
 
+    // kcluster constants.
+    // a: arithmetic mean
+    // m: median
     rb_define_const(mFlock, "METHOD_AVERAGE", INT2NUM('a'));
     rb_define_const(mFlock, "METHOD_MEDIAN",  INT2NUM('m'));
+
+    // treecluster constants.
+    // s: pairwise single-linkage clustering
+    // m: pairwise maximum- (or complete-) linkage clustering
+    // a: pairwise average-linkage clustering
+    // c: pairwise centroid-linkage clustering
+    rb_define_const(mFlock, "METHOD_SINGLE_LINKAGE",   INT2NUM('s'));
+    rb_define_const(mFlock, "METHOD_MAXIMUM_LINKAGE",  INT2NUM('m'));
+    rb_define_const(mFlock, "METHOD_AVERAGE_LINKAGE",  INT2NUM('a'));
+    rb_define_const(mFlock, "METHOD_CENTROID_LINKAGE", INT2NUM('c'));
+
 
     rb_define_const(mFlock, "METRIC_EUCLIDIAN",                       INT2NUM('e'));
     rb_define_const(mFlock, "METRIC_CITY_BLOCK",                      INT2NUM('b'));

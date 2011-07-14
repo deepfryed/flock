@@ -2447,7 +2447,7 @@ returns 0. If successful, getclustercentroids returns 1.
 int getclustercentroids (int nclusters, int nrows, int ncolumns, double **data, int **mask,
                          int clusterid[], double **cdata, int **cmask, int transpose, char method) {
     switch (method) {
-        case 'm':
+        case 'm': {
             const int nelements = (transpose == 0) ? nrows : ncolumns;
             double *cache = malloc (nelements * sizeof (double));
             if (!cache)
@@ -2456,10 +2456,12 @@ int getclustercentroids (int nclusters, int nrows, int ncolumns, double **data, 
                                clusterid, cdata, cmask, transpose, cache);
             free (cache);
             return 1;
-        case 'a':
+        }
+        case 'a': {
             getclustermeans (nclusters, nrows, ncolumns, data, mask,
                              clusterid, cdata, cmask, transpose);
             return 1;
+        }
     }
 
     return 0;
@@ -4695,8 +4697,8 @@ double clusterdistance (int nrows, int ncolumns, double **data,
     }
 
     switch (method) {
-        case 'a':
-        {                       /* Find the center */
+        case 'a': {
+            /* Find the center */
             int i, j, k;
             if (transpose == 0) {
                 double distance;
@@ -4794,8 +4796,8 @@ double clusterdistance (int nrows, int ncolumns, double **data,
                 return distance;
             }
         }
-        case 'm':
-        {
+
+        case 'm': {
             int i, j, k;
             if (transpose == 0) {
                 double distance;
@@ -4910,8 +4912,8 @@ double clusterdistance (int nrows, int ncolumns, double **data,
                 return distance;
             }
         }
-        case 's':
-        {
+
+        case 's': {
             int i1, i2, j1, j2;
             const int n = (transpose == 0) ? ncolumns : nrows;
             double mindistance = DBL_MAX;
@@ -4928,8 +4930,8 @@ double clusterdistance (int nrows, int ncolumns, double **data,
                 }
             return mindistance;
         }
-        case 'x':
-        {
+
+        case 'x': {
             int i1, i2, j1, j2;
             const int n = (transpose == 0) ? ncolumns : nrows;
             double maxdistance = 0;
@@ -4946,8 +4948,8 @@ double clusterdistance (int nrows, int ncolumns, double **data,
                 }
             return maxdistance;
         }
-        case 'v':
-        {
+
+        case 'v': {
             int i1, i2, j1, j2;
             const int n = (transpose == 0) ? ncolumns : nrows;
             double distance = 0;

@@ -8,25 +8,31 @@
 static VALUE mFlock;
 typedef double (*distance_fn)(int, double**, double**, int**, int**, const double [], int, int, int);
 
-int get_int_option(VALUE option, char *key, int def) {
-  if (NIL_P(option)) return def;
+int get_int_option(VALUE option, char *key, int default_value) {
+    if (NIL_P(option)) return default_value;
 
-  VALUE value = rb_hash_aref(option, ID2SYM(rb_intern(key)));
-  return NIL_P(value) ? def : NUM2INT(value);
+    VALUE value = rb_hash_aref(option, ID2SYM(rb_intern(key)));
+    return NIL_P(value) ? default_value : NUM2INT(value);
 }
 
-double get_dbl_option(VALUE option, char *key, double def) {
-  if (NIL_P(option)) return def;
+int get_bool_option(VALUE option, char *key, int default_value) {
+    if (NIL_P(option)) return default_value;
+    VALUE value = rb_hash_aref(option, ID2SYM(rb_intern(key)));
+    return (TYPE(value) == T_FALSE || TYPE(value) == T_NIL) ? 0 : 1;
+}
 
-  VALUE value = rb_hash_aref(option, ID2SYM(rb_intern(key)));
-  return NIL_P(value) ? def : NUM2DBL(value);
+double get_dbl_option(VALUE option, char *key, double default_value) {
+    if (NIL_P(option)) return default_value;
+
+    VALUE value = rb_hash_aref(option, ID2SYM(rb_intern(key)));
+    return NIL_P(value) ? default_value : NUM2DBL(value);
 }
 
 VALUE get_value_option(VALUE option, char *key, VALUE default_value) {
-  if (NIL_P(option)) return default_value;
+    if (NIL_P(option)) return default_value;
 
-  VALUE value = rb_hash_aref(option, ID2SYM(rb_intern(key)));
-  return NIL_P(value) ? default_value : value;
+    VALUE value = rb_hash_aref(option, ID2SYM(rb_intern(key)));
+    return NIL_P(value) ? default_value : value;
 }
 
 VALUE rb_do_kcluster(int argc, VALUE *argv, VALUE self) {
@@ -44,7 +50,7 @@ VALUE rb_do_kcluster(int argc, VALUE *argv, VALUE self) {
     if (!NIL_P(mask) && TYPE(mask) != T_ARRAY)
         rb_raise(rb_eArgError, "mask should be an array of arrays");
 
-    int transpose = get_int_option(options, "transpose", 0);
+    int transpose = get_bool_option(options, "transpose", 0);
     int npass     = get_int_option(options, "iterations", DEFAULT_ITERATIONS);
 
     // a = average, m = means

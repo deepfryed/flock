@@ -2041,12 +2041,10 @@ static int binomial (int n, double p) {
             /* Step 5.0 */
             k = abs (y - m);
             if (k > 20 && k < 0.5 * n * p * q - 1.0) {  /* Step 5.2 */
-                double rho =
-                    (k / (n * p * q)) *
-                    ((k * (k / 3.0 + 0.625) + 0.1666666666666) / (n * p * q) +
-                     0.5);
-                double t = -k * k / (2 * n * p * q);
-                double A = log (v);
+                double rho = (k / (n * p * q)) * ((k * (k / 3.0 + 0.625) + 0.1666666666666) / (n * p * q) + 0.5);
+                double t   = -k * k / (2 * n * p * q);
+                double A   = log (v);
+
                 if (A < t - rho)
                     return y;
                 else if (A > t + rho)
@@ -2452,14 +2450,12 @@ int getclustercentroids (int nclusters, int nrows, int ncolumns, double **data, 
             double *cache = malloc (nelements * sizeof (double));
             if (!cache)
                 return 0;
-            getclustermedians (nclusters, nrows, ncolumns, data, mask,
-                               clusterid, cdata, cmask, transpose, cache);
+            getclustermedians (nclusters, nrows, ncolumns, data, mask, clusterid, cdata, cmask, transpose, cache);
             free (cache);
             return 1;
         }
         case 'a': {
-            getclustermeans (nclusters, nrows, ncolumns, data, mask,
-                             clusterid, cdata, cmask, transpose);
+            getclustermeans (nclusters, nrows, ncolumns, data, mask, clusterid, cdata, cmask, transpose);
             return 1;
         }
     }
@@ -2559,13 +2555,11 @@ static int kmeans (int nclusters, int nrows, int ncolumns, double **data, int **
             switch (assign) {
                 case 1:
                     /* use kmeans++ weighted randomized initialisation */
-                    weightedassign (nclusters, nrows, ncolumns, data, mask,
-                                    weight, transpose, metric, tclusterid);
+                    weightedassign (nclusters, nrows, ncolumns, data, mask, weight, transpose, metric, tclusterid);
                     break;
                 case 2:
                     /* use kmeans++ initialisation by spreading out cluster centers as much as possible */
-                    spreadoutassign (nclusters, nrows, ncolumns, data, mask,
-                                     weight, transpose, metric, tclusterid);
+                    spreadoutassign (nclusters, nrows, ncolumns, data, mask, weight, transpose, metric, tclusterid);
                     break;
                 default:
                     /* Perform the EM algorithm. First, randomly assign elements to clusters. */
@@ -2611,9 +2605,7 @@ static int kmeans (int nclusters, int nrows, int ncolumns, double **data, int **
                     double tdistance;
                     if (j == k)
                         continue;
-                    tdistance =
-                        metric (ndata, data, cdata, mask, cmask, weight, i, j,
-                                transpose);
+                    tdistance = metric (ndata, data, cdata, mask, cmask, weight, i, j, transpose);
                     if (tdistance < distance) {
                         distance = tdistance;
                         counts[tclusterid[i]]--;
@@ -2702,13 +2694,11 @@ static int kmedians (int nclusters, int nrows, int ncolumns, double **data, int 
             switch (assign) {
                 case 1:
                     /* use kmeans++ weighted randomized initialisation */
-                    weightedassign (nclusters, nrows, ncolumns, data, mask,
-                                    weight, transpose, metric, tclusterid);
+                    weightedassign(nclusters, nrows, ncolumns, data, mask, weight, transpose, metric, tclusterid);
                     break;
                 case 2:
                     /* use kmeans++ initialisation by spreading out cluster centers as much as possible */
-                    spreadoutassign (nclusters, nrows, ncolumns, data, mask,
-                                     weight, transpose, metric, tclusterid);
+                    spreadoutassign(nclusters, nrows, ncolumns, data, mask, weight, transpose, metric, tclusterid);
                     break;
                 default:
                     /* Perform the EM algorithm. First, randomly assign elements to clusters. */
@@ -2736,8 +2726,7 @@ static int kmedians (int nclusters, int nrows, int ncolumns, double **data, int 
             counter++;
 
             /* Find the center */
-            getclustermedians (nclusters, nrows, ncolumns, data, mask,
-                               tclusterid, cdata, cmask, transpose, cache);
+            getclustermedians(nclusters, nrows, ncolumns, data, mask, tclusterid, cdata, cmask, transpose, cache);
 
             /* Calculate the distances */
             for (i = 0; i < nelements; i++) {
@@ -2747,16 +2736,12 @@ static int kmedians (int nclusters, int nrows, int ncolumns, double **data, int 
                     continue;
                 /* No reassignment if that would lead to an empty cluster */
                 /* Treat the present cluster as a special case */
-                distance =
-                    metric (ndata, data, cdata, mask, cmask, weight, i, k,
-                            transpose);
+                distance = metric (ndata, data, cdata, mask, cmask, weight, i, k, transpose);
                 for (j = 0; j < nclusters; j++) {
                     double tdistance;
                     if (j == k)
                         continue;
-                    tdistance =
-                        metric (ndata, data, cdata, mask, cmask, weight, i, j,
-                                transpose);
+                    tdistance = metric (ndata, data, cdata, mask, cmask, weight, i, j, transpose);
                     if (tdistance < distance) {
                         distance = tdistance;
                         counts[tclusterid[i]]--;
@@ -2959,10 +2944,9 @@ void kcluster (int nclusters, int nrows, int ncolumns,
     if (method == 'm') {
         double *cache = malloc (nelements * sizeof (double));
         if (cache) {
-            *ifound =
-                kmedians (nclusters, nrows, ncolumns, data, mask, weight,
-                          transpose, npass, dist, cdata, cmask, clusterid,
-                          error, tclusterid, counts, mapping, cache, assign);
+            *ifound = kmedians (nclusters, nrows, ncolumns, data, mask, weight,
+                                transpose, npass, dist, cdata, cmask, clusterid,
+                                error, tclusterid, counts, mapping, cache, assign);
             free (cache);
         }
     }
@@ -3111,8 +3095,7 @@ void kmedoids (int nclusters, int nelements, double **distmatrix, int npass,
             counter++;
 
             /* Find the center */
-            getclustermedoids (nclusters, nelements, distmatrix, tclusterid,
-                               centroids, errors);
+            getclustermedoids (nclusters, nelements, distmatrix, tclusterid, centroids, errors);
 
             /* Find the closest cluster */
             for (i = 0; i < nelements; i++) {
@@ -3270,9 +3253,7 @@ double** distancematrix (int nrows, int ncolumns, double **data,
     /* Calculate the distances and save them in the ragged array */
     for (i = 1; i < n; i++)
         for (j = 0; j < i; j++)
-            matrix[i][j] =
-                metric (ndata, data, data, mask, mask, weights, i, j,
-                        transpose);
+            matrix[i][j] = metric(ndata, data, data, mask, mask, weights, i, j, transpose);
 
     return matrix;
 }
@@ -3367,12 +3348,9 @@ double* calculate_weights (int nrows, int ncolumns, double **data, int **mask,
     for (i = 0; i < nelements; i++) {
         result[i] += 1.0;
         for (j = 0; j < i; j++) {
-            const double distance =
-                metric (ndata, data, data, mask, mask, weights,
-                        i, j, transpose);
+            const double distance = metric (ndata, data, data, mask, mask, weights, i, j, transpose);
             if (distance < cutoff) {
-                const double dweight =
-                    exp (exponent * log (1 - distance / cutoff));
+                const double dweight = exp (exponent * log (1 - distance / cutoff));
                 /* pow() causes a crash on AIX */
                 result[i] += dweight;
                 result[j] += dweight;
@@ -3587,15 +3565,13 @@ static Node* pclcluster (int nrows, int ncolumns, double **data, int **mask,
     for (inode = 0; inode < nnodes; inode++) {  /* Find the pair with the shortest distance */
         int is = 1;
         int js = 0;
-        result[inode].distance =
-            find_closest_pair (nelements - inode, distmatrix, &is, &js);
+        result[inode].distance = find_closest_pair (nelements - inode, distmatrix, &is, &js);
         result[inode].left = distid[js];
         result[inode].right = distid[is];
 
         /* Make node js the new node */
         for (i = 0; i < ndata; i++) {
-            data[js][i] =
-                data[js][i] * mask[js][i] + data[is][i] * mask[is][i];
+            data[js][i] = data[js][i] * mask[js][i] + data[is][i] * mask[is][i];
             mask[js][i] += mask[is][i];
             if (mask[js][i])
                 data[js][i] /= mask[js][i];
@@ -3614,11 +3590,9 @@ static Node* pclcluster (int nrows, int ncolumns, double **data, int **mask,
 
         distid[js] = -inode - 1;
         for (i = 0; i < js; i++)
-            distmatrix[js][i] =
-                metric (ndata, data, data, mask, mask, weight, js, i, 0);
+            distmatrix[js][i] = metric (ndata, data, data, mask, mask, weight, js, i, 0);
         for (i = js + 1; i < nnodes - inode; i++)
-            distmatrix[i][js] =
-                metric (ndata, data, data, mask, mask, weight, js, i, 0);
+            distmatrix[i][js] = metric (ndata, data, data, mask, mask, weight, js, i, 0);
     }
 
     /* Free temporarily allocated space */
@@ -3893,8 +3867,7 @@ static Node* pmlcluster (int nelements, double **distmatrix) {
     for (n = nelements; n > 1; n--) {
         int is = 1;
         int js = 0;
-        result[nelements - n].distance =
-            find_closest_pair (n, distmatrix, &is, &js);
+        result[nelements - n].distance = find_closest_pair (n, distmatrix, &is, &js);
 
         /* Fix the distances */
         for (j = 0; j < js; j++)
@@ -3986,8 +3959,7 @@ static Node* palcluster (int nelements, double **distmatrix) {
         int sum;
         int is = 1;
         int js = 0;
-        result[nelements - n].distance =
-            find_closest_pair (n, distmatrix, &is, &js);
+        result[nelements - n].distance = find_closest_pair (n, distmatrix, &is, &js);
 
         /* Save result */
         result[nelements - n].left = clusterid[is];
@@ -3996,18 +3968,15 @@ static Node* palcluster (int nelements, double **distmatrix) {
         /* Fix the distances */
         sum = number[is] + number[js];
         for (j = 0; j < js; j++) {
-            distmatrix[js][j] = distmatrix[is][j] * number[is]
-                + distmatrix[js][j] * number[js];
+            distmatrix[js][j] = distmatrix[is][j] * number[is] + distmatrix[js][j] * number[js];
             distmatrix[js][j] /= sum;
         }
         for (j = js + 1; j < is; j++) {
-            distmatrix[j][js] = distmatrix[is][j] * number[is]
-                + distmatrix[j][js] * number[js];
+            distmatrix[j][js] = distmatrix[is][j] * number[is] + distmatrix[j][js] * number[js];
             distmatrix[j][js] /= sum;
         }
         for (j = is + 1; j < n; j++) {
-            distmatrix[j][js] = distmatrix[j][is] * number[is]
-                + distmatrix[j][js] * number[js];
+            distmatrix[j][js] = distmatrix[j][is] * number[is] + distmatrix[j][js] * number[js];
             distmatrix[j][js] /= sum;
         }
 
@@ -4122,17 +4091,14 @@ Node* treecluster (int nrows, int ncolumns, double **data, int **mask,
 
     /* Calculate the distance matrix if the user didn't give it */
     if (ldistmatrix) {
-        distmatrix =
-            distancematrix (nrows, ncolumns, data, mask, weight, dist,
-                            transpose);
+        distmatrix = distancematrix (nrows, ncolumns, data, mask, weight, dist, transpose);
         if (!distmatrix)
             return NULL;        /* Insufficient memory */
     }
 
     switch (method) {
         case 's':
-            result = pslcluster (nrows, ncolumns, data, mask, weight, distmatrix,
-                                 dist, transpose);
+            result = pslcluster (nrows, ncolumns, data, mask, weight, distmatrix, dist, transpose);
             break;
         case 'm':
             result = pmlcluster (nelements, distmatrix);
@@ -4141,8 +4107,7 @@ Node* treecluster (int nrows, int ncolumns, double **data, int **mask,
             result = palcluster (nelements, distmatrix);
             break;
         case 'c':
-            result = pclcluster (nrows, ncolumns, data, mask, weight, distmatrix,
-                                 dist, transpose);
+            result = pclcluster (nrows, ncolumns, data, mask, weight, distmatrix, dist, transpose);
             break;
     }
 
@@ -4260,23 +4225,21 @@ static void somworker (int nrows, int ncolumns, double **data, int **mask,
 
     /* Start the iteration */
     for (iter = 0; iter < niter; iter++) {
-        int ixbest = 0;
-        int iybest = 0;
+        int ixbest  = 0;
+        int iybest  = 0;
         int iobject = iter % nelements;
-        iobject = index[iobject];
+        iobject     = index[iobject];
+
         if (transpose == 0) {
-            double closest = metric (ndata, data, celldata[ixbest],
-                                     mask, dummymask, weights, iobject,
-                                     iybest, transpose);
-            double radius =
-                maxradius * (1. - ((double) iter) / ((double) niter));
-            double tau = inittau * (1. - ((double) iter) / ((double) niter));
+            double closest = metric(ndata, data, celldata[ixbest], mask, dummymask, weights, iobject, iybest, transpose);
+            double radius  = maxradius * (1. - ((double) iter) / ((double) niter));
+            double tau     = inittau * (1. - ((double) iter) / ((double) niter));
 
             for (ix = 0; ix < nxgrid; ix++) {
                 for (iy = 0; iy < nygrid; iy++) {
-                    double distance = metric (ndata, data, celldata[ix],
-                                              mask, dummymask, weights,
-                                              iobject, iy, transpose);
+                    double distance = metric(ndata, data, celldata[ix], mask, dummymask, weights,
+                                             iobject, iy, transpose);
+
                     if (distance < closest) {
                         ixbest = ix;
                         iybest = iy;
@@ -4286,16 +4249,12 @@ static void somworker (int nrows, int ncolumns, double **data, int **mask,
             }
             for (ix = 0; ix < nxgrid; ix++) {
                 for (iy = 0; iy < nygrid; iy++) {
-                    if (sqrt
-                        ((ix - ixbest) * (ix - ixbest) +
-                         (iy - iybest) * (iy - iybest)) < radius) {
+                    if (sqrt((ix - ixbest) * (ix - ixbest) + (iy - iybest) * (iy - iybest)) < radius) {
                         double sum = 0.;
                         for (i = 0; i < ndata; i++) {
                             if (mask[iobject][i] == 0)
                                 continue;
-                            celldata[ix][iy][i] +=
-                                tau * (data[iobject][i] / stddata[iobject] -
-                                       celldata[ix][iy][i]);
+                            celldata[ix][iy][i] += tau * (data[iobject][i] / stddata[iobject] - celldata[ix][iy][i]);
                         }
                         for (i = 0; i < ndata; i++) {
                             double term = celldata[ix][iy][i];
@@ -4320,18 +4279,13 @@ static void somworker (int nrows, int ncolumns, double **data, int **mask,
 
             for (i = 0; i < ndata; i++)
                 celldatavector[i] = &(celldata[ixbest][iybest][i]);
-            closest = metric (ndata, data, celldatavector,
-                              mask, dummymask, weights, iobject, 0,
-                              transpose);
+            closest = metric(ndata, data, celldatavector, mask, dummymask, weights, iobject, 0, transpose);
             for (ix = 0; ix < nxgrid; ix++) {
                 for (iy = 0; iy < nygrid; iy++) {
                     double distance;
                     for (i = 0; i < ndata; i++)
                         celldatavector[i] = &(celldata[ixbest][iybest][i]);
-                    distance =
-                        metric (ndata, data, celldatavector,
-                                mask, dummymask, weights, iobject, 0,
-                                transpose);
+                    distance = metric(ndata, data, celldatavector, mask, dummymask, weights, iobject, 0, transpose);
                     if (distance < closest) {
                         ixbest = ix;
                         iybest = iy;
@@ -4349,9 +4303,7 @@ static void somworker (int nrows, int ncolumns, double **data, int **mask,
                         for (i = 0; i < ndata; i++) {
                             if (mask[i][iobject] == 0)
                                 continue;
-                            celldata[ix][iy][i] +=
-                                tau * (data[i][iobject] / stddata[iobject] -
-                                       celldata[ix][iy][i]);
+                            celldata[ix][iy][i] += tau * (data[i][iobject] / stddata[iobject] - celldata[ix][iy][i]);
                         }
                         for (i = 0; i < ndata; i++) {
                             double term = celldata[ix][iy][i];
@@ -4391,10 +4343,7 @@ static void somassign (int nrows, int ncolumns, double **data, int **mask,
     int i, j;
 
     /* Set the metric function as indicated by dist */
-    double (*metric)
-
-        (int, double **, double **, int **, int **, const double[], int, int,
-       int) = setmetric (dist);
+    double (*metric)(int, double **, double **, int **, int **, const double[], int, int, int) = setmetric (dist);
 
     if (transpose == 0) {
         int **dummymask = malloc (nygrid * sizeof (int *));
@@ -4406,15 +4355,11 @@ static void somassign (int nrows, int ncolumns, double **data, int **mask,
         for (i = 0; i < nrows; i++) {
             int ixbest = 0;
             int iybest = 0;
-            double closest = metric (ndata, data, celldata[ixbest],
-                                     mask, dummymask, weights, i, iybest,
-                                     transpose);
+            double closest = metric(ndata, data, celldata[ixbest], mask, dummymask, weights, i, iybest, transpose);
             int ix, iy;
             for (ix = 0; ix < nxgrid; ix++) {
                 for (iy = 0; iy < nygrid; iy++) {
-                    double distance = metric (ndata, data, celldata[ix],
-                                              mask, dummymask, weights, i, iy,
-                                              transpose);
+                    double distance = metric(ndata, data, celldata[ix], mask, dummymask, weights, i, iy, transpose);
                     if (distance < closest) {
                         ixbest = ix;
                         iybest = iy;
@@ -4443,16 +4388,13 @@ static void somassign (int nrows, int ncolumns, double **data, int **mask,
             int ix, iy;
             for (j = 0; j < ndata; j++)
                 celldatavector[j] = &(celldata[ixbest][iybest][j]);
-            closest = metric (ndata, data, celldatavector,
-                              mask, dummymask, weights, i, 0, transpose);
+            closest = metric(ndata, data, celldatavector, mask, dummymask, weights, i, 0, transpose);
             for (ix = 0; ix < nxgrid; ix++) {
                 for (iy = 0; iy < nygrid; iy++) {
                     double distance;
                     for (j = 0; j < ndata; j++)
                         celldatavector[j] = &(celldata[ix][iy][j]);
-                    distance = metric (ndata, data, celldatavector,
-                                       mask, dummymask, weights, i, 0,
-                                       transpose);
+                    distance = metric(ndata, data, celldatavector, mask, dummymask, weights, i, 0, transpose);
                     if (distance < closest) {
                         ixbest = ix;
                         iybest = iy;
@@ -4570,11 +4512,9 @@ void somcluster (int nrows, int ncolumns, double **data, int **mask,
         }
     }
 
-    somworker (nrows, ncolumns, data, mask, weight, transpose, nxgrid, nygrid,
-               inittau, celldata, niter, dist);
+    somworker (nrows, ncolumns, data, mask, weight, transpose, nxgrid, nygrid, inittau, celldata, niter, dist);
     if (clusterid)
-        somassign (nrows, ncolumns, data, mask, weight, transpose,
-                   nxgrid, nygrid, celldata, dist, clusterid);
+        somassign(nrows, ncolumns, data, mask, weight, transpose, nxgrid, nygrid, celldata, dist, clusterid);
     if (lcelldata == 0) {
         for (i = 0; i < nxgrid; i++)
             for (j = 0; j < nygrid; j++)
@@ -4742,9 +4682,7 @@ double clusterdistance (int nrows, int ncolumns, double **data,
                         else
                             cmask[i][j] = 0;
                     }
-                distance =
-                    metric (ncolumns, cdata, cdata, cmask, cmask, weight, 0,
-                            1, 0);
+                distance = metric(ncolumns, cdata, cdata, cmask, cmask, weight, 0, 1, 0);
                 for (i = 0; i < 2; i++) {
                     free (cdata[i]);
                     free (cmask[i]);
@@ -4788,9 +4726,7 @@ double clusterdistance (int nrows, int ncolumns, double **data,
                         }
                         else
                             cmask[i][j] = 0;
-                distance =
-                    metric (nrows, cdata, cdata, cmask, cmask, weight, 0, 1,
-                            1);
+                distance = metric(nrows, cdata, cdata, cmask, cmask, weight, 0, 1, 1);
                 for (i = 0; i < nrows; i++) {
                     free (count[i]);
                     free (cdata[i]);
@@ -4807,12 +4743,12 @@ double clusterdistance (int nrows, int ncolumns, double **data,
             int i, j, k;
             if (transpose == 0) {
                 double distance;
-                double *temp = malloc (nrows * sizeof (double));
+                double *temp = malloc(nrows * sizeof (double));
                 double *cdata[2];
                 int *cmask[2];
                 for (i = 0; i < 2; i++) {
-                    cdata[i] = malloc (ncolumns * sizeof (double));
-                    cmask[i] = malloc (ncolumns * sizeof (int));
+                    cdata[i] = malloc(ncolumns * sizeof (double));
+                    cmask[i] = malloc(ncolumns * sizeof (int));
                 }
                 for (j = 0; j < ncolumns; j++) {
                     int count = 0;
@@ -4824,7 +4760,7 @@ double clusterdistance (int nrows, int ncolumns, double **data,
                         }
                     }
                     if (count > 0) {
-                        cdata[0][j] = median (count, temp);
+                        cdata[0][j] = median(count, temp);
                         cmask[0][j] = 1;
                     }
                     else {
@@ -4842,7 +4778,7 @@ double clusterdistance (int nrows, int ncolumns, double **data,
                         }
                     }
                     if (count > 0) {
-                        cdata[1][j] = median (count, temp);
+                        cdata[1][j] = median(count, temp);
                         cmask[1][j] = 1;
                     }
                     else {
@@ -4850,9 +4786,7 @@ double clusterdistance (int nrows, int ncolumns, double **data,
                         cmask[1][j] = 0;
                     }
                 }
-                distance =
-                    metric (ncolumns, cdata, cdata, cmask, cmask, weight, 0,
-                            1, 0);
+                distance = metric(ncolumns, cdata, cdata, cmask, cmask, weight, 0, 1, 0);
                 for (i = 0; i < 2; i++) {
                     free (cdata[i]);
                     free (cmask[i]);
@@ -4862,12 +4796,12 @@ double clusterdistance (int nrows, int ncolumns, double **data,
             }
             else {
                 double distance;
-                double *temp = malloc (ncolumns * sizeof (double));
-                double **cdata = malloc (nrows * sizeof (double *));
+                double *temp = malloc(ncolumns * sizeof (double));
+                double **cdata = malloc(nrows * sizeof (double *));
                 int **cmask = malloc (nrows * sizeof (int *));
                 for (i = 0; i < nrows; i++) {
-                    cdata[i] = malloc (2 * sizeof (double));
-                    cmask[i] = malloc (2 * sizeof (int));
+                    cdata[i] = malloc(2 * sizeof (double));
+                    cmask[i] = malloc(2 * sizeof (int));
                 }
                 for (j = 0; j < nrows; j++) {
                     int count = 0;
@@ -4879,7 +4813,7 @@ double clusterdistance (int nrows, int ncolumns, double **data,
                         }
                     }
                     if (count > 0) {
-                        cdata[j][0] = median (count, temp);
+                        cdata[j][0] = median(count, temp);
                         cmask[j][0] = 1;
                     }
                     else {
@@ -4897,7 +4831,7 @@ double clusterdistance (int nrows, int ncolumns, double **data,
                         }
                     }
                     if (count > 0) {
-                        cdata[j][1] = median (count, temp);
+                        cdata[j][1] = median(count, temp);
                         cmask[j][1] = 1;
                     }
                     else {
@@ -4905,9 +4839,7 @@ double clusterdistance (int nrows, int ncolumns, double **data,
                         cmask[j][1] = 0;
                     }
                 }
-                distance =
-                    metric (nrows, cdata, cdata, cmask, cmask, weight, 0, 1,
-                            1);
+                distance = metric(nrows, cdata, cdata, cmask, cmask, weight, 0, 1, 1);
                 for (i = 0; i < nrows; i++) {
                     free (cdata[i]);
                     free (cmask[i]);
@@ -4928,9 +4860,7 @@ double clusterdistance (int nrows, int ncolumns, double **data,
                     double distance;
                     j1 = index1[i1];
                     j2 = index2[i2];
-                    distance =
-                        metric (n, data, data, mask, mask, weight, j1, j2,
-                                transpose);
+                    distance = metric(n, data, data, mask, mask, weight, j1, j2, transpose);
                     if (distance < mindistance)
                         mindistance = distance;
                 }
@@ -4946,9 +4876,7 @@ double clusterdistance (int nrows, int ncolumns, double **data,
                     double distance;
                     j1 = index1[i1];
                     j2 = index2[i2];
-                    distance =
-                        metric (n, data, data, mask, mask, weight, j1, j2,
-                                transpose);
+                    distance = metric(n, data, data, mask, mask, weight, j1, j2, transpose);
                     if (distance > maxdistance)
                         maxdistance = distance;
                 }
@@ -4963,9 +4891,7 @@ double clusterdistance (int nrows, int ncolumns, double **data,
                 for (i2 = 0; i2 < n2; i2++) {
                     j1 = index1[i1];
                     j2 = index2[i2];
-                    distance +=
-                        metric (n, data, data, mask, mask, weight, j1, j2,
-                                transpose);
+                    distance += metric (n, data, data, mask, mask, weight, j1, j2, transpose);
                 }
             distance /= (n1 * n2);
             return distance;

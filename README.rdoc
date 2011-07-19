@@ -49,11 +49,16 @@ Provides bindings to clustering methods in Cluster 3.0.
   mask[11][ 0]=0; mask[11][ 1]=1; mask[11][ 2]=1; mask[11][ 3] = 1;
   mask[12][ 0]=1; mask[12][ 1]=1; mask[12][ 2]=1; mask[12][ 3] = 1;
 
-  pp Flock.kmeans(6, data, mask)
+  pp Flock.kcluster(6, data, mask: mask)
 
-  # method:
-  #    - Flock::METHOD_AVERAGE (default)
-  #    - Flock::METHOD_MEDIAN
+  # method: (kcluster)
+  #    - Flock::METHOD_AVERAGE (kmeans, this is the default)
+  #    - Flock::METHOD_MEDIAN  (kmedians)
+  # method: (treecluster)
+  #    - Flock::METHOD_AVERAGE_LINKAGE (default)
+  #    - Flock::METHOD_SINGLE_LINKAGE
+  #    - Flock::METHOD_MAXIMUM_LINKAGE
+  #    - Flock::METHOD_CENTROID_LINKAGE
   # metric:
   #    - Flock::METRIC_EUCLIDIAN (default)
   #    - Flock::METRIC_CITY_BLOCK
@@ -63,20 +68,26 @@ Provides bindings to clustering methods in Cluster 3.0.
   #    - Flock::METRIC_ABSOLUTE_UNCENTERED_CORRELATION
   #    - Flock::METRIC_SPEARMAN
   #    - Flock::METRIC_KENDALL
-  pp Flock.kmeans(
+  # seed: (initial cluster assignment)
+  #    - Flock::SEED_RANDOM            (uniform random, this is the default)
+  #    - Flock::SEED_KMEANS_PLUSPLUS   (kmeans++ - initial cluster centers chosen weighted by distance from closest center)
+  #    - Flock::SEED_SPREADOUT         (similar to kmeans++ but deterministic, spreads out cluster centers)
+
+  pp Flock.kcluster(
     6,
     data,
-    mask,
+    mask:      mask,
     method:    Flock::METHOD_AVERAGE,
     metric:    Flock::METRIC_EUCLIDIAN,
     transpose: 0,
     weights:   Array.new(13) {1.0},
+    seed:      Flock::SEED_RANDOM
   )
 
   pp Flock.treecluster(
     6,
     data,
-    mask,
+    mask:      mask,
     method:    Flock::METHOD_AVERAGE,
     metric:    Flock::METRIC_EUCLIDIAN,
     transpose: 0,
@@ -98,7 +109,7 @@ Provides bindings to clustering methods in Cluster 3.0.
   data << { 2 => 0.75 }
   data << { 1 => 0.60 }
 
-  pp Flock.sparse_kmeans(2, data)
+  pp Flock.kcluster(2, data, sparse: true)
 
   data = []
 
@@ -110,8 +121,8 @@ Provides bindings to clustering methods in Cluster 3.0.
   data << %w(apple)
 
   # additional options such as metric, iterations can be passed in a hash.
-  pp Flock.sparse_kmeans(2, data)
-  pp Flock.sparse_treecluster(2, data)
+  pp Flock.kcluster(2, data, sparse: true)
+  pp Flock.treecluster(2, data, sparse: true)
 
 
 === Self-Organizing Map
@@ -134,7 +145,9 @@ a fixed cluster size like K-Means or Tree Cluster.
 
   # nxgrid, nygrid, data are required.
   # additional options such as metric, iterations can be passed in a hash.
-  pp Flock.sparse_self_organizing_map(2, 2, data)
+
+  # cluster upto 4 groups in a 2x2 grid.
+  pp Flock.self_organizing_map(2, 2, data, sparse: true)
 
 Note: SOM clustering provides the 2D grid coordinate for each vector instead of an integer cluster value
 for each vector like K-Means and Tree Cluster methods do.

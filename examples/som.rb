@@ -10,5 +10,4 @@ data << %w(white cyan)
 data << %w(orange)
 data << %w(apple)
 
-data, weights = Flock.densify(data)
-pp Flock.self_organizing_map(2, 2, data)
+pp Flock.self_organizing_map(2, 2, data, sparse: true)

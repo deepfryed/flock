@@ -10,4 +10,4 @@ data << %w(white cyan)
 data << %w(orange)
 data << %w(apple)
 
-pp Flock.sparse_treecluster(2, data)
+pp Flock.treecluster(2, data, sparse: true)

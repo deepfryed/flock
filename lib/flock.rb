@@ -1,6 +1,100 @@
 require_relative '../ext/flock'
 
+# Ruby bindings to data clustering algorithms provided by
+# {Cluster 3.0}[http://bonsai.hgc.jp/~mdehoon/software/cluster/software.htm]
+#
+# == Algorithms implemented
+#
+# * K-Means, K-Medians, K-Means++
+# * Self-Organizing Maps
+# * Tree Cluster or Hierarchical Clustering
+#
+# == Synopsis
+#
+#   require 'pp'
+#   require 'flock'
+#
+#   # sparse data.
+#   data = []
+#   data << %w(apple orange)
+#   data << %w(black white)
+#   data << %w(white cyan)
+#   data << %w(apple orange)
+#   data << %w(apple)
+#
+#   pp Flock.kcluster(2, data, sparse: true, seed: Flock::SEED_RANDOM)
+#   pp Flock.kcluster(2, data, sparse: true, seed: Flock::SEED_KMEANS_PLUSPLUS)
+#   pp Flock.kcluster(2, data, sparse: true, seed: Flock::SEED_SPREADOUT)
+#
+#   # dense data.
+#   data     = Array.new(13) {[]}
+#   mask     = Array.new(13) {[]}
+#   weights  = Array.new(13) {1.0}
+#
+#   data[0][0] = 0.1; data[0][1] = 0.0;
+#   data[1][0] = 1.4; data[1][1] = 1.3;
+#   data[2][0] = 1.2; data[2][1] = 2.5;
+#   data[3][0] = 2.3; data[3][1] = 1.5;
+#   data[4][0] = 1.7; data[4][1] = 0.7;
+#   data[5][0] = 0.0; data[5][1] = 3.9;
+#   data[6][0] = 6.7; data[6][1] = 3.9;
+#
+#   mask[0][0] = 1;   mask[0][1] = 1;
+#   mask[1][0] = 1;   mask[1][1] = 1;
+#   mask[2][0] = 1;   mask[2][1] = 1;
+#   mask[3][0] = 1;   mask[3][1] = 1;
+#   mask[4][0] = 1;   mask[4][1] = 1;
+#   mask[5][0] = 0;   mask[5][1] = 1;
+#   mask[6][0] = 1;   mask[6][1] = 1;
+#
+#   pp Flock.kcluster(2, data, mask: mask, weights: weights)
+#
+#
+# == See
+# * examples/* for more examples.
+# * README.rdoc for more details.
+# * API.rdoc is a public API overview.
 module Flock
+
+  # Cluster using k-means and k-medians.
+  #
+  # @example
+  #
+  #   data = []
+  #   data << %w(apple orange)
+  #   data << %w(black white)
+  #   data << %w(white cyan)
+  #   data << %w(apple orange)
+  #   data << %w(apple)
+  #   result = Flock.kcluster(2, data, sparse: true, seed: Flock::SEED_RANDOM)
+  #
+  # @param [Fixnum] size  number of clusters the data points are grouped into.
+  # @param [Array]  data  An array of arrays of sparse or dense data, or an array of hashes of sparse data. Dense data
+  #                       should always be in numeric form. Sparse data values are converted to a dense row format
+  #                       by looking at the unique values and then converting each data point into a numeric vector
+  #                       that represents the presence or absence of a value in that data point.
+  # @option options [Array]       :mask       An array of arrays of 1s and 0s denoting if an element in the datapoint is
+  #                                           to be used for computing distance.
+  # @option options [Array]       :weights    Numeric weight for each data point.
+  # @option options [true, false] :transpose  Transpose the dense data matrix.
+  # @option options [Fixnum]      :iterations Number of iterations to be run (defaults to 100).
+  # @option options [Fixnum]      :method     Clustering method
+  #                                             - Flock::METHOD_AVERAGE (default)
+  #                                             - Flock::METHOD_MEDIAN
+  # @option options [Fixnum]      :metric     Distance measure, one of the following
+  #                                             - Flock::METRIC_EUCLIDIAN (default)
+  #                                             - Flock::METRIC_CITY_BLOCK
+  #                                             - Flock::METRIC_CORRELATION
+  #                                             - Flock::METRIC_ABSOLUTE_CORRELATION
+  #                                             - Flock::METRIC_UNCENTERED_CORRELATION
+  #                                             - Flock::METRIC_ABSOLUTE_UNCENTERED_CORRELATION
+  #                                             - Flock::METRIC_SPEARMAN
+  #                                             - Flock::METRIC_KENDALL
+  # @option options [Fixnum]      :seed       Initial seeding of clusters
+  #                                             - Flock::SEED_RANDOM (uniform distribution, default)
+  #                                             - Flock::SEED_KMEANS_PLUSPLUS (KMeans++)
+  #                                             - Flock::SEED_SPREADOUT (deterministic but similar to KMeans++)
+  # @return [Hash]
   def self.kcluster size, data, options = {}
     options[:sparse] = true if sparse?(data[0])
     if options[:sparse]
@@ -10,6 +104,28 @@ module Flock
     do_kcluster(size, data, options)
   end
 
+  # Arranges data points on a 2D grid without having to specify a fixed cluster size. So in theory you could have
+  # a maximum of nxm clusters.
+  #
+  # @example
+  #
+  #   data = []
+  #   data << %w(apple orange)
+  #   data << %w(black white)
+  #   data << %w(white cyan)
+  #   data << %w(apple orange)
+  #   data << %w(apple)
+  #   result = Flock.self_organizing_map(2, 2, data, sparse: true)
+  #
+  # @param  [Fixnum]  nx          Grid size in 1st dimension (x)
+  # @param  [Fixnum]  ny          Grid size in 2nd dimension (y)
+  # @param  [Array]   data        See Flock#kcluster
+  # @option options   [Array]       :mask       See Flock#kcluster
+  # @option options   [true, false] :transpose  See Flock#kcluster
+  # @option options   [Fixnum]      :iterations See Flock#kcluster
+  # @option options   [Fixnum]      :metric     See Flock#kcluster
+  # @option options   [Numeric]     :tau        Initial tau value for distance metric.
+  # @return [Hash]
   def self.self_organizing_map nx, ny, data, options = {}
     options[:sparse] = true if sparse?(data[0])
     if options[:sparse]
@@ -19,6 +135,30 @@ module Flock
     do_self_organizing_map(nx, ny, data, options)
   end
 
+  # Clusters data into hierarchies and then returns the clusters required using cut-tree.
+  #
+  # @example
+  #
+  #   data = []
+  #   data << %w(apple orange)
+  #   data << %w(black white)
+  #   data << %w(white cyan)
+  #   data << %w(apple orange)
+  #   data << %w(apple)
+  #   result = Flock.treecluster(2, data, sparse: true)
+  #
+  # @param  [Fixnum]  size        Number of clusters required. (See Flock#kcluster)
+  # @param  [Array]   data        See Flock#kcluster
+  # @option options   [Array]       :mask       See Flock#kcluster
+  # @option options   [true, false] :transpose  See Flock#kcluster
+  # @option options   [Fixnum]      :iterations See Flock#kcluster
+  # @option options   [Fixnum]      :metric     See Flock#kcluster
+  # @option options   [Fixnum]      :method     Method to use for treecluster
+  #                                               - Flock::METHOD_SINGLE_LINKAGE
+  #                                               - Flock::METHOD_MAXIMUM_LINKAGE
+  #                                               - Flock::METHOD_AVERAGE_LINKAGE
+  #                                               - Flock::METHOD_CENTROID_LINKAGE
+  # @return [Hash]
   def self.treecluster size, data, options = {}
     options[:sparse] = true if sparse?(data[0])
     if options[:sparse]

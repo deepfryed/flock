@@ -8,38 +8,47 @@
 static VALUE mFlock;
 typedef double (*distance_fn)(int, double**, double**, int**, int**, const double [], int, int, int);
 
-int opt_int_value(VALUE option, char *key, int def) {
+int get_int_option(VALUE option, char *key, int def) {
   if (NIL_P(option)) return def;
 
   VALUE value = rb_hash_aref(option, ID2SYM(rb_intern(key)));
   return NIL_P(value) ? def : NUM2INT(value);
 }
 
-int opt_double_value(VALUE option, char *key, double def) {
+double get_dbl_option(VALUE option, char *key, double def) {
   if (NIL_P(option)) return def;
 
   VALUE value = rb_hash_aref(option, ID2SYM(rb_intern(key)));
   return NIL_P(value) ? def : NUM2DBL(value);
 }
 
-VALUE rb_kmeans(int argc, VALUE *argv, VALUE self) {
+VALUE get_value_option(VALUE option, char *key, VALUE default_value) {
+  if (NIL_P(option)) return default_value;
+
+  VALUE value = rb_hash_aref(option, ID2SYM(rb_intern(key)));
+  return NIL_P(value) ? default_value : value;
+}
+
+VALUE rb_do_kcluster(int argc, VALUE *argv, VALUE self) {
     VALUE size, data, mask, weights, options;
-    rb_scan_args(argc, argv, "22", &size, &data, &mask, &options);
+    rb_scan_args(argc, argv, "21", &size, &data, &options);
 
     if (TYPE(data) != T_ARRAY)
         rb_raise(rb_eArgError, "data should be an array of arrays");
 
-    if (!NIL_P(mask) && TYPE(mask) != T_ARRAY)
-        rb_raise(rb_eArgError, "mask should be an array of arrays");
-
     if (NIL_P(size) || NUM2INT(rb_Integer(size)) > RARRAY_LEN(data))
         rb_raise(rb_eArgError, "size should be > 0 and <= data size");
 
-    int transpose = opt_int_value(options, "transpose", 0);
-    int npass     = opt_int_value(options, "iterations", DEFAULT_ITERATIONS);
+    mask = get_value_option(options, "mask", Qnil);
+
+    if (!NIL_P(mask) && TYPE(mask) != T_ARRAY)
+        rb_raise(rb_eArgError, "mask should be an array of arrays");
+
+    int transpose = get_int_option(options, "transpose", 0);
+    int npass     = get_int_option(options, "iterations", DEFAULT_ITERATIONS);
 
     // a = average, m = means
-    int method    = opt_int_value(options, "method", 'a');
+    int method    = get_int_option(options, "method", 'a');
 
     // e = euclidian,
     // b = city-block distance
@@ -49,10 +58,10 @@ VALUE rb_kmeans(int argc, VALUE *argv, VALUE self) {
     // x = absolute uncentered correlation
     // s = spearman's rank correlation
     // k = kendall's tau
-    int dist      = opt_int_value(options, "metric", 'e');
+    int dist      = get_int_option(options, "metric", 'e');
 
     // initial assignment
-    int assign    = opt_int_value(options, "seed",    0);
+    int assign    = get_int_option(options, "seed",    0);
 
     int i,j;
     int nrows = RARRAY_LEN(data);
@@ -143,7 +152,7 @@ VALUE rb_kmeans(int argc, VALUE *argv, VALUE self) {
     return result;
 }
 
-VALUE rb_som(int argc, VALUE *argv, VALUE self) {
+VALUE rb_do_self_organizing_map(int argc, VALUE *argv, VALUE self) {
     VALUE nx, ny, data, mask, weights, options;
     rb_scan_args(argc, argv, "32", &nx, &ny, &data, &mask, &options);
 
@@ -161,8 +170,8 @@ VALUE rb_som(int argc, VALUE *argv, VALUE self) {
 
     int nxgrid    = NUM2INT(rb_Integer(nx));
     int nygrid    = NUM2INT(rb_Integer(ny));
-    int transpose = opt_int_value(options, "transpose", 0);
-    int npass     = opt_int_value(options, "iterations", DEFAULT_ITERATIONS);
+    int transpose = get_int_option(options, "transpose", 0);
+    int npass     = get_int_option(options, "iterations", DEFAULT_ITERATIONS);
 
     // e = euclidian,
     // b = city-block distance
@@ -172,8 +181,8 @@ VALUE rb_som(int argc, VALUE *argv, VALUE self) {
     // x = absolute uncentered correlation
     // s = spearman's rank correlation
     // k = kendall's tau
-    int dist      = opt_int_value(options, "metric", 'e');
-    double tau    = opt_double_value(options, "tau", 1.0);
+    int dist      = get_int_option(options, "metric", 'e');
+    double tau    = get_dbl_option(options, "tau", 1.0);
 
     int i, j, k;
     int nrows = RARRAY_LEN(data);
@@ -265,7 +274,7 @@ VALUE rb_som(int argc, VALUE *argv, VALUE self) {
     return result;
 }
 
-VALUE rb_treecluster(int argc, VALUE *argv, VALUE self) {
+VALUE rb_do_treecluster(int argc, VALUE *argv, VALUE self) {
     VALUE size, data, mask, weights, options;
     rb_scan_args(argc, argv, "22", &size, &data, &mask, &options);
 
@@ -278,13 +287,13 @@ VALUE rb_treecluster(int argc, VALUE *argv, VALUE self) {
     if (NIL_P(size) || NUM2INT(rb_Integer(size)) > RARRAY_LEN(data))
         rb_raise(rb_eArgError, "size should be > 0 and <= data size");
 
-    int transpose = opt_int_value(options, "transpose", 0);
+    int transpose = get_int_option(options, "transpose", 0);
 
     // s: pairwise single-linkage clustering
     // m: pairwise maximum- (or complete-) linkage clustering
     // a: pairwise average-linkage clustering
     // c: pairwise centroid-linkage clustering
-    int method    = opt_int_value(options, "method", 'a');
+    int method    = get_int_option(options, "method", 'a');
 
     // e = euclidian,
     // b = city-block distance
@@ -294,7 +303,7 @@ VALUE rb_treecluster(int argc, VALUE *argv, VALUE self) {
     // x = absolute uncentered correlation
     // s = spearman's rank correlation
     // k = kendall's tau
-    int dist      = opt_int_value(options, "metric", 'e');
+    int dist      = get_int_option(options, "metric", 'e');
 
     int i,j;
     int nrows = RARRAY_LEN(data);
@@ -466,9 +475,9 @@ VALUE rb_kendall(int argc, VALUE *argv, VALUE self) {
 
 void Init_flock(void) {
     mFlock = rb_define_module("Flock");
-    rb_define_module_function(mFlock, "kmeans", RUBY_METHOD_FUNC(rb_kmeans), -1);
-    rb_define_module_function(mFlock, "self_organizing_map", RUBY_METHOD_FUNC(rb_som), -1);
-    rb_define_module_function(mFlock, "treecluster", RUBY_METHOD_FUNC(rb_treecluster), -1);
+    rb_define_module_function(mFlock, "do_kcluster",            RUBY_METHOD_FUNC(rb_do_kcluster),            -1);
+    rb_define_module_function(mFlock, "do_self_organizing_map", RUBY_METHOD_FUNC(rb_do_self_organizing_map), -1);
+    rb_define_module_function(mFlock, "do_treecluster",         RUBY_METHOD_FUNC(rb_do_treecluster),         -1);
 
     // kcluster constants.
     // a: arithmetic mean

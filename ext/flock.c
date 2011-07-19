@@ -160,10 +160,12 @@ VALUE rb_do_kcluster(int argc, VALUE *argv, VALUE self) {
 
 VALUE rb_do_self_organizing_map(int argc, VALUE *argv, VALUE self) {
     VALUE nx, ny, data, mask, weights, options;
-    rb_scan_args(argc, argv, "32", &nx, &ny, &data, &mask, &options);
+    rb_scan_args(argc, argv, "31", &nx, &ny, &data, &options);
 
     if (TYPE(data) != T_ARRAY)
         rb_raise(rb_eArgError, "data should be an array of arrays");
+
+    mask = get_value_option(options, "mask", Qnil);
 
     if (!NIL_P(mask) && TYPE(mask) != T_ARRAY)
         rb_raise(rb_eArgError, "mask should be an array of arrays");
@@ -282,10 +284,12 @@ VALUE rb_do_self_organizing_map(int argc, VALUE *argv, VALUE self) {
 
 VALUE rb_do_treecluster(int argc, VALUE *argv, VALUE self) {
     VALUE size, data, mask, weights, options;
-    rb_scan_args(argc, argv, "22", &size, &data, &mask, &options);
+    rb_scan_args(argc, argv, "21", &size, &data, &options);
 
     if (TYPE(data) != T_ARRAY)
         rb_raise(rb_eArgError, "data should be an array of arrays");
+
+    mask = get_value_option(options, "mask", Qnil);
 
     if (!NIL_P(mask) && TYPE(mask) != T_ARRAY)
         rb_raise(rb_eArgError, "mask should be an array of arrays");

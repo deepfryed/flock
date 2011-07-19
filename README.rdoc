@@ -157,6 +157,9 @@ for each vector like K-Means and Tree Cluster methods do.
 * YARD docs.
 * {K-Tree clustering}[http://arxiv.org/pdf/1001.0827v1]
 * Use Sparse Matrix instead of converting sparse data into dense matrices.
+* BIRCH hierarchical clustering.
+* EM clustering.
+* kcluster auto-suggest cluster size.
 
 = License
 

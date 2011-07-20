@@ -1,0 +1,22 @@
+= Flock
+
+== API
+
+=== Clustering methods
+
+  Flock
+    .kcluster               #=> Hash
+    .treecluster            #=> Hash
+    .self_organizing_map    #=> Hash
+
+=== Distance measurement between centroids or data points.
+
+  Flock
+    .euclidian_distance                         #=> Numeric
+    .cityblock_distance                         #=> Numeric
+    .correlation_distance                       #=> Numeric
+    .absolute_correlation_distance              #=> Numeric
+    .uncentered_correlation_distance            #=> Numeric
+    .absolute_uncentered_correlation_distance   #=> Numeric
+    .spearman_distance                          #=> Numeric
+    .kendall_distance                           #=> Numeric

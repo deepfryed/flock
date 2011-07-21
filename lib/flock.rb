@@ -74,10 +74,10 @@ module Flock
   #                       by looking at the unique values and then converting each data point into a numeric vector
   #                       that represents the presence or absence of a value in that data point.
   # @option options [Array]       :mask       An array of arrays of 1s and 0s denoting if an element in the datapoint is
-  #                                           to be used for computing distance.
-  # @option options [Array]       :weights    Numeric weight for each data point.
-  # @option options [true, false] :transpose  Transpose the dense data matrix.
-  # @option options [Fixnum]      :iterations Number of iterations to be run (defaults to 100).
+  #                                           to be used for computing distance (defaults to: all 1 vectors).
+  # @option options [Array]       :weights    Numeric weight for each data point (defaults to: all 1 vector).
+  # @option options [true, false] :transpose  Transpose the dense data matrix (defaults to: false).
+  # @option options [Fixnum]      :iterations Number of iterations to be run (defaults to: 100).
   # @option options [Fixnum]      :method     Clustering method
   #                                             - Flock::METHOD_AVERAGE (default)
   #                                             - Flock::METHOD_MEDIAN
@@ -91,9 +91,9 @@ module Flock
   #                                             - Flock::METRIC_SPEARMAN
   #                                             - Flock::METRIC_KENDALL
   # @option options [Fixnum]      :seed       Initial seeding of clusters
-  #                                             - Flock::SEED_RANDOM (uniform distribution, default)
-  #                                             - Flock::SEED_KMEANS_PLUSPLUS (KMeans++)
-  #                                             - Flock::SEED_SPREADOUT (deterministic but similar to KMeans++)
+  #                                             - Flock::SEED_RANDOM (default)
+  #                                             - Flock::SEED_KMEANS_PLUSPLUS
+  #                                             - Flock::SEED_SPREADOUT
   # @return [Hash]
   def self.kcluster size, data, options = {}
     options[:sparse] = true if sparse?(data[0])
@@ -156,7 +156,7 @@ module Flock
   # @option options   [Fixnum]      :method     Method to use for treecluster
   #                                               - Flock::METHOD_SINGLE_LINKAGE
   #                                               - Flock::METHOD_MAXIMUM_LINKAGE
-  #                                               - Flock::METHOD_AVERAGE_LINKAGE
+  #                                               - Flock::METHOD_AVERAGE_LINKAGE (default)
   #                                               - Flock::METHOD_CENTROID_LINKAGE
   # @return [Hash]
   def self.treecluster size, data, options = {}
@@ -185,6 +185,7 @@ module Flock
         sv.each {|k,v| vector[dims[k]] = v }
         vector
       end
+
       [dims, data]
     end
 
@@ -195,6 +196,7 @@ module Flock
         sv.each {|k| vector[dims[k]] = 1 }
         vector
       end
+
       [dims, data]
     end
 

@@ -16,3 +16,8 @@ begin
 rescue LoadError
   puts "Jeweler (or a dependency) not available. Install it with: gem install jeweler"
 end
+
+require 'yard'
+YARD::Rake::YardocTask.new do |yard|
+  yard.files   = ['lib/**/*.rb', 'ext/flock.c']
+end

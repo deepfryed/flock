@@ -5,7 +5,7 @@
 #define CONST_GET(scope, constant) (rb_funcall(scope, ID_CONST_GET, 1, rb_str_new2(constant)))
 #define DEFAULT_ITERATIONS 100
 
-static VALUE mFlock;
+static VALUE mFlock, scFlock;
 typedef double (*distance_fn)(int, double**, double**, int**, int**, const double [], int, int, int);
 
 int get_int_option(VALUE option, char *key, int default_value) {
@@ -35,6 +35,7 @@ VALUE get_value_option(VALUE option, char *key, VALUE default_value) {
     return NIL_P(value) ? default_value : value;
 }
 
+/* @api private */
 VALUE rb_do_kcluster(int argc, VALUE *argv, VALUE self) {
     VALUE size, data, mask, weights, options;
     rb_scan_args(argc, argv, "21", &size, &data, &options);
@@ -158,6 +159,7 @@ VALUE rb_do_kcluster(int argc, VALUE *argv, VALUE self) {
     return result;
 }
 
+/* @api private */
 VALUE rb_do_self_organizing_map(int argc, VALUE *argv, VALUE self) {
     VALUE nx, ny, data, mask, weights, options;
     rb_scan_args(argc, argv, "31", &nx, &ny, &data, &options);
@@ -282,6 +284,7 @@ VALUE rb_do_self_organizing_map(int argc, VALUE *argv, VALUE self) {
     return result;
 }
 
+/* @api private */
 VALUE rb_do_treecluster(int argc, VALUE *argv, VALUE self) {
     VALUE size, data, mask, weights, options;
     rb_scan_args(argc, argv, "21", &size, &data, &options);
@@ -434,48 +437,124 @@ VALUE rb_distance(VALUE vec1, VALUE m1, VALUE vec2, VALUE m2, distance_fn fn) {
     return DBL2NUM(dist);
 }
 
+/*
+  Euclidian distance measure
+
+  @example
+    Flock.euclidian_distance([0, 0], [1, 1])
+    Flock.euclidian_distance([0, 0, 0], [1, 1, 1], [1, 1, 0], [1, 1, 0]) # with mask
+
+  @overload euclidian_distance(vector1, vector2, mask1 = identity, mask2 = identity)
+    @param [Array]  vector1     Numeric vector
+    @param [Array]  vector2     Numeric vector
+    @param [Array]  mask1       Optional mask for vector1
+    @param [Array]  mask2       Optional mask for vector2
+*/
 VALUE rb_euclid(int argc, VALUE *argv, VALUE self) {
     VALUE v1, v2, m1, m2;
     rb_scan_args(argc, argv, "22", &v1, &v2, &m1, &m2);
     return rb_distance(v1, m1, v2, m2, euclid);
 }
 
+/*
+  Cityblock distance measure
+
+  @overload cityblock_distance(vector1, vector2, mask1 = identity, mask2 = identity)
+    @param [Array]  vector1     Numeric vector
+    @param [Array]  vector2     Numeric vector
+    @param [Array]  mask1       Optional mask for vector1
+    @param [Array]  mask2       Optional mask for vector2
+*/
 VALUE rb_cityblock(int argc, VALUE *argv, VALUE self) {
     VALUE v1, v2, m1, m2;
     rb_scan_args(argc, argv, "22", &v1, &v2, &m1, &m2);
     return rb_distance(v1, m1, v2, m2, cityblock);
 }
 
+/*
+  Correlation distance measure
+
+  @overload correlation_distance(vector1, vector2, mask1 = identity, mask2 = identity)
+    @param [Array]  vector1     Numeric vector
+    @param [Array]  vector2     Numeric vector
+    @param [Array]  mask1       Optional mask for vector1
+    @param [Array]  mask2       Optional mask for vector2
+*/
 VALUE rb_correlation(int argc, VALUE *argv, VALUE self) {
     VALUE v1, v2, m1, m2;
     rb_scan_args(argc, argv, "22", &v1, &v2, &m1, &m2);
     return rb_distance(v1, m1, v2, m2, correlation);
 }
 
+/*
+  Uncentered correlation distance measure
+
+  @overload uncentered_correlation_distance(vector1, vector2, mask1 = identity, mask2 = identity)
+    @param [Array]  vector1     Numeric vector
+    @param [Array]  vector2     Numeric vector
+    @param [Array]  mask1       Optional mask for vector1
+    @param [Array]  mask2       Optional mask for vector2
+*/
 VALUE rb_ucorrelation(int argc, VALUE *argv, VALUE self) {
     VALUE v1, v2, m1, m2;
     rb_scan_args(argc, argv, "22", &v1, &v2, &m1, &m2);
     return rb_distance(v1, m1, v2, m2, ucorrelation);
 }
 
+/*
+  Absolute correlation distance measure
+
+  @overload absolute_correlation_distance(vector1, vector2, mask1 = identity, mask2 = identity)
+    @param [Array]  vector1     Numeric vector
+    @param [Array]  vector2     Numeric vector
+    @param [Array]  mask1       Optional mask for vector1
+    @param [Array]  mask2       Optional mask for vector2
+*/
 VALUE rb_acorrelation(int argc, VALUE *argv, VALUE self) {
     VALUE v1, v2, m1, m2;
     rb_scan_args(argc, argv, "22", &v1, &v2, &m1, &m2);
     return rb_distance(v1, m1, v2, m2, acorrelation);
 }
 
+/*
+  Absolute uncentered correlation distance measure
+
+  @overload absolute_uncentered_correlation_distance(vector1, vector2, mask1 = identity, mask2 = identity)
+    @param [Array]  vector1     Numeric vector
+    @param [Array]  vector2     Numeric vector
+    @param [Array]  mask1       Optional mask for vector1
+    @param [Array]  mask2       Optional mask for vector2
+*/
 VALUE rb_uacorrelation(int argc, VALUE *argv, VALUE self) {
     VALUE v1, v2, m1, m2;
     rb_scan_args(argc, argv, "22", &v1, &v2, &m1, &m2);
     return rb_distance(v1, m1, v2, m2, uacorrelation);
 }
 
+/*
+  Spearman distance measure
+
+  @overload spearman_distance(vector1, vector2, mask1 = identity, mask2 = identity)
+    @param [Array]  vector1     Numeric vector
+    @param [Array]  vector2     Numeric vector
+    @param [Array]  mask1       Optional mask for vector1
+    @param [Array]  mask2       Optional mask for vector2
+*/
 VALUE rb_spearman(int argc, VALUE *argv, VALUE self) {
     VALUE v1, v2, m1, m2;
     rb_scan_args(argc, argv, "22", &v1, &v2, &m1, &m2);
     return rb_distance(v1, m1, v2, m2, spearman);
 }
 
+/*
+  Kendall distance measure
+
+  @overload kendall_distance(vector1, vector2, mask1 = identity, mask2 = identity)
+    @param [Array]  vector1     Numeric vector
+    @param [Array]  vector2     Numeric vector
+    @param [Array]  mask1       Optional mask for vector1
+    @param [Array]  mask2       Optional mask for vector2
+*/
 VALUE rb_kendall(int argc, VALUE *argv, VALUE self) {
     VALUE v1, v2, m1, m2;
     rb_scan_args(argc, argv, "22", &v1, &v2, &m1, &m2);
@@ -484,25 +563,26 @@ VALUE rb_kendall(int argc, VALUE *argv, VALUE self) {
 
 
 void Init_flock(void) {
-    mFlock = rb_define_module("Flock");
-    rb_define_module_function(mFlock, "do_kcluster",            RUBY_METHOD_FUNC(rb_do_kcluster),            -1);
-    rb_define_module_function(mFlock, "do_self_organizing_map", RUBY_METHOD_FUNC(rb_do_self_organizing_map), -1);
-    rb_define_module_function(mFlock, "do_treecluster",         RUBY_METHOD_FUNC(rb_do_treecluster),         -1);
+    mFlock  = rb_define_module("Flock");
+    scFlock = rb_singleton_class(mFlock);
 
-    // kcluster constants.
-    // a: arithmetic mean
-    // m: median
+    rb_define_private_method(scFlock, "do_kcluster",            RUBY_METHOD_FUNC(rb_do_kcluster),            -1);
+    rb_define_private_method(scFlock, "do_self_organizing_map", RUBY_METHOD_FUNC(rb_do_self_organizing_map), -1);
+    rb_define_private_method(scFlock, "do_treecluster",         RUBY_METHOD_FUNC(rb_do_treecluster),         -1);
+
+    /* kcluster method - K-Means */
     rb_define_const(mFlock, "METHOD_AVERAGE", INT2NUM('a'));
+
+    /* kcluster method - K-Medians */
     rb_define_const(mFlock, "METHOD_MEDIAN",  INT2NUM('m'));
 
-    // treecluster constants.
-    // s: pairwise single-linkage clustering
-    // m: pairwise maximum- (or complete-) linkage clustering
-    // a: pairwise average-linkage clustering
-    // c: pairwise centroid-linkage clustering
+    /* treecluster method - pairwise single-linkage clustering */
     rb_define_const(mFlock, "METHOD_SINGLE_LINKAGE",   INT2NUM('s'));
+    /* treecluster method - pairwise maximum- (or complete-) linkage clustering */
     rb_define_const(mFlock, "METHOD_MAXIMUM_LINKAGE",  INT2NUM('m'));
+    /* treecluster method - pairwise average-linkage clustering */
     rb_define_const(mFlock, "METHOD_AVERAGE_LINKAGE",  INT2NUM('a'));
+    /* treecluster method - pairwise centroid-linkage clustering */
     rb_define_const(mFlock, "METHOD_CENTROID_LINKAGE", INT2NUM('c'));
 
 
@@ -515,8 +595,19 @@ void Init_flock(void) {
     rb_define_const(mFlock, "METRIC_SPEARMAN",                        INT2NUM('s'));
     rb_define_const(mFlock, "METRIC_KENDALL",                         INT2NUM('k'));
 
+    /* Randomly assign data points to clusters using a uniform distribution. */
     rb_define_const(mFlock, "SEED_RANDOM",          INT2NUM(0));
+
+    /*
+        K-Means++ style initialization where data points are probabilistically assigned to clusters
+        based on their distance from closest cluster.
+    */
     rb_define_const(mFlock, "SEED_KMEANS_PLUSPLUS", INT2NUM(1));
+
+    /*
+        Deterministic cluster assignment by spreading out initial clusters as far away from each other
+        as possible.
+    */
     rb_define_const(mFlock, "SEED_SPREADOUT",       INT2NUM(2));
 
     rb_define_module_function(mFlock, "euclidian_distance", RUBY_METHOD_FUNC(rb_euclid), -1);

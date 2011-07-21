@@ -129,7 +129,7 @@ Provides bindings to clustering methods in Cluster 3.0.
 
 Self-Organizing Maps (SOM) require that you specify a 2D grid on which data points can cluster. Some of the
 grid points may be empty and others might have clusters mapped to them. There is no need to provide
-a fixed cluster size like K-Means or Tree Cluster.
+a fixed cluster size.
 
   require 'pp'
   require 'flock'
@@ -150,7 +150,7 @@ a fixed cluster size like K-Means or Tree Cluster.
   pp Flock.self_organizing_map(2, 2, data, sparse: true)
 
 Note: SOM clustering provides the 2D grid coordinate for each vector instead of an integer cluster value
-for each vector like K-Means and Tree Cluster methods do.
+for each vector like kcluster and treecluster.
 
 == TODO
 

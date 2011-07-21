@@ -181,6 +181,26 @@ module Flock
     do_treecluster(size, data, options)
   end
 
+  # @deprecated use {kcluster} instead.
+  def self.kmeans size, data, options = {}
+    kcluster(size, data, options)
+  end
+
+  # @deprecated use {kcluster}(size, data, sparse: true, ...) instead.
+  def self.sparse_kmeans size, data, options = {}
+    kcluster(size, data, options.merge(sparse: true))
+  end
+
+  # @deprecated use {treecluster}(size, data, sparse: true, ...) instead.
+  def self.sparse_treecluster size, data, options = {}
+    treecluster(size, data, options.merge(sparse: true))
+  end
+
+  # @deprecated use {self_organizing_map}(nx, ny, data, sparse: true, ...) instead.
+  def self.sparse_self_organizing_map nx, ny, data, options = {}
+    self_organizing_map(nx, ny, data, options.merge(sparse: true))
+  end
+
   private
 
     def self.sparse? row

@@ -95,6 +95,12 @@ module Flock
   #                                             - Flock::SEED_KMEANS_PLUSPLUS
   #                                             - Flock::SEED_SPREADOUT
   # @return [Hash]
+  #   {
+  #     :cluster  => [Array],
+  #     :centroid => [Array<Array>],
+  #     :error    => [Numeric],
+  #     :repeated => [Fixnum]
+  #   }
   def self.kcluster size, data, options = {}
     options[:sparse] = true if sparse?(data[0])
     if options[:sparse]
@@ -126,6 +132,10 @@ module Flock
   # @option options   [Fixnum]      :metric     See Flock#kcluster
   # @option options   [Numeric]     :tau        Initial tau value for distance metric.
   # @return [Hash]
+  #   {
+  #     :cluster  => [Array<Array>],
+  #     :centroid => [Array<Array>]
+  #   }
   def self.self_organizing_map nx, ny, data, options = {}
     options[:sparse] = true if sparse?(data[0])
     if options[:sparse]
@@ -159,6 +169,9 @@ module Flock
   #                                               - Flock::METHOD_AVERAGE_LINKAGE (default)
   #                                               - Flock::METHOD_CENTROID_LINKAGE
   # @return [Hash]
+  #   {
+  #     :cluster => [Array]
+  #   }
   def self.treecluster size, data, options = {}
     options[:sparse] = true if sparse?(data[0])
     if options[:sparse]

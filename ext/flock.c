@@ -378,7 +378,7 @@ VALUE rb_do_treecluster(int argc, VALUE *argv, VALUE self) {
     if (tree)
         free(tree);
     else
-        rb_raise(rb_eNoMemError, "tree cluster ran out of memory");
+        rb_raise(rb_eNoMemError, "treecluster ran out of memory");
 
     return result;
 }

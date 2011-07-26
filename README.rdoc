@@ -152,9 +152,22 @@ a fixed cluster size.
 Note: SOM clustering provides the 2D grid coordinate for each vector instead of an integer cluster value
 for each vector like kcluster and treecluster.
 
+== Changes from 0.4.x to 0.5.0
+
+=== Deprecated methods
+
+* kmeans: use kcluster instead
+* sparse_kmeans: use kcluster with option sparse: true
+* sparse_treecluster: use treecluster with option sparse: true
+* sparse_self_organizing_map: use self_organizing_map with option sparse: true
+
+=== Method signature
+
+* kmeans, treecluster and self_organizing_map no longer take mask as a parameter.
+* mask needs to passed along with other optional parameters in the options hash.
+
 == TODO
 
-* YARD docs.
 * {K-Tree clustering}[http://arxiv.org/pdf/1001.0827v1]
 * Use Sparse Matrix instead of converting sparse data into dense matrices.
 * BIRCH hierarchical clustering.
